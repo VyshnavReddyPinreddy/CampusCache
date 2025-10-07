@@ -1,0 +1,494 @@
+import React, { useState, useEffect } from 'react';
+
+// --- Helper Components ---
+
+const Header = ({ user, setPage, setUser }) => {
+    const handleLogout = () => {
+        setUser(null);
+        setPage('login');
+    };
+
+    return (
+        <header className="bg-gray-800 text-white shadow-md">
+            <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div className="text-2xl font-bold cursor-pointer" onClick={() => setPage('dashboard')}>
+                    CampusCache 📚
+                </div>
+                <div className="flex items-center space-x-4">
+                    {user ? (
+                        <>
+                            <span className="hidden sm:inline">Welcome, {user.email.split('@')[0]}</span>
+                            <button onClick={() => setPage('leaderboard')} className="px-4 py-2 rounded hover:bg-gray-700 transition">Leaderboard</button>
+                            <button onClick={() => setPage('ask')} className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition">Ask Question</button>
+                            {user.isAdmin && (
+                                <button onClick={() => setPage('admin')} className="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700 transition">Admin</button>
+                            )}
+                            <button onClick={handleLogout} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
+                        </>
+                    ) : (
+                        <>
+                            <button onClick={() => setPage('login')} className="px-4 py-2 rounded hover:bg-gray-700 transition">Login</button>
+                            <button onClick={() => setPage('register')} className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition">Register</button>
+                        </>
+                    )}
+                </div>
+            </nav>
+        </header>
+    );
+};
+
+const Spinner = () => (
+    <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+    </div>
+);
+
+const MessageBox = ({ message, type }) => {
+    if (!message) return null;
+    const baseClasses = "p-4 rounded-md my-4 text-center";
+    const typeClasses = {
+        error: "bg-red-100 border border-red-400 text-red-700",
+        success: "bg-green-100 border border-green-400 text-green-700",
+    };
+    return <div className={`${baseClasses} ${typeClasses[type]}`}>{message}</div>;
+};
+
+
+// --- Page Components ---
+
+const LoginPage = ({ setPage, setUser, setNotification }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setNotification(null);
+        try {
+            const response = await fetch('http://localhost:3001/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setUser(data.user);
+                setPage('dashboard');
+                setNotification({ type: 'success', message: 'Logged in successfully!' });
+            } else {
+                setNotification({ type: 'error', message: data.message || 'Login failed.' });
+            }
+        } catch (error) {
+            setNotification({ type: 'error', message: 'Could not connect to the server.' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+                <h2 className="text-3xl font-bold text-center text-gray-800">Login to CampusCache</h2>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Email (institutional)</label>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    <button type="submit" disabled={isLoading} className="w-full py-2 px-4 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors">
+                        {isLoading ? 'Logging in...' : 'Login'}
+                    </button>
+                </form>
+                <p className="text-sm text-center text-gray-600">
+                    Don't have an account? <span onClick={() => setPage('register')} className="font-medium text-blue-600 hover:underline cursor-pointer">Register here</span>
+                </p>
+            </div>
+        </div>
+    );
+};
+
+const RegisterPage = ({ setPage, setUser, setNotification }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setNotification(null);
+        try {
+            const response = await fetch('http://localhost:3001/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setUser(data.user);
+                setPage('dashboard');
+                 setNotification({ type: 'success', message: 'Registration successful!' });
+            } else {
+                setNotification({ type: 'error', message: data.message || 'Registration failed.' });
+            }
+        } catch (error) {
+            setNotification({ type: 'error', message: 'Could not connect to the server.' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    return (
+         <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+                <h2 className="text-3xl font-bold text-center text-gray-800">Create your Account</h2>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Institutional Email</label>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    <button type="submit" disabled={isLoading} className="w-full py-2 px-4 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors">
+                        {isLoading ? 'Creating Account...' : 'Register'}
+                    </button>
+                </form>
+                 <p className="text-sm text-center text-gray-600">
+                    Already have an account? <span onClick={() => setPage('login')} className="font-medium text-blue-600 hover:underline cursor-pointer">Login here</span>
+                </p>
+            </div>
+        </div>
+    );
+};
+
+const Dashboard = ({ setPage, setSelectedQuestionId, user }) => {
+    const [questions, setQuestions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/api/questions');
+                const data = await response.json();
+                setQuestions(data);
+            } catch (error) {
+                console.error("Failed to fetch questions", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchQuestions();
+    }, []);
+
+    const handleQuestionClick = (id) => {
+        setSelectedQuestionId(id);
+        setPage('questionDetail');
+    };
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">Recent Questions</h1>
+            {isLoading ? <Spinner /> : (
+                <div className="space-y-4">
+                    {questions.map(q => (
+                        <div key={q.id} onClick={() => handleQuestionClick(q.id)} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer">
+                            <h2 className="text-xl font-semibold text-blue-600">{q.title}</h2>
+                            <p className="text-gray-600 mt-2">{q.body.substring(0, 150)}...</p>
+                            <div className="text-sm text-gray-500 mt-4">
+                                <span>Asked by {q.isAnonymous ? 'Anonymous' : q.authorEmail.split('@')[0]}</span>
+                                <span className="mx-2">•</span>
+                                <span>{q.answers.length} Answers</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const AskQuestionPage = ({ setPage, user, setNotification }) => {
+    const [title, setTitle] = useState('');
+    const [body, setBody] = useState('');
+    const [isAnonymous, setIsAnonymous] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setNotification(null);
+        try {
+            const response = await fetch('http://localhost:3001/api/questions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, body, isAnonymous, authorEmail: user.email }),
+            });
+            if (response.ok) {
+                setPage('dashboard');
+                setNotification({type: 'success', message: 'Question posted successfully!'});
+            } else {
+                 const data = await response.json();
+                 setNotification({type: 'error', message: data.message || 'Failed to post question.'});
+            }
+        } catch (error) {
+            setNotification({type: 'error', message: 'Could not connect to server.'});
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold mb-6">Ask a Public Question</h1>
+            <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md space-y-6">
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
+                    <p className="text-xs text-gray-500 mb-2">Be specific and imagine you’re asking a question to another person.</p>
+                    <input type="text" value={title} onChange={e => setTitle(e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Body</label>
+                    <p className="text-xs text-gray-500 mb-2">Include all the information someone would need to answer your question.</p>
+                    <textarea value={body} onChange={e => setBody(e.target.value)} required rows="10" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                <div className="flex items-center">
+                    <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} id="anonymous" className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                    <label htmlFor="anonymous" className="ml-2 block text-sm text-gray-900">Post Anonymously</label>
+                </div>
+                <button type="submit" disabled={isLoading} className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors">
+                    {isLoading ? 'Posting...' : 'Post Your Question'}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+const QuestionDetailPage = ({ questionId, user, setNotification }) => {
+    const [question, setQuestion] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [answerBody, setAnswerBody] = useState('');
+    const [isAnonymous, setIsAnonymous] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const fetchQuestion = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`http://localhost:3001/api/questions/${questionId}`);
+            const data = await response.json();
+            // Sort answers by votes descending
+            data.answers.sort((a, b) => b.votes - a.votes);
+            setQuestion(data);
+        } catch (error) {
+            console.error("Failed to fetch question", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    useEffect(() => {
+        fetchQuestion();
+    }, [questionId]);
+    
+    const handleAnswerSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setNotification(null);
+        try {
+            const response = await fetch(`http://localhost:3001/api/questions/${questionId}/answers`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ body: answerBody, isAnonymous, authorEmail: user.email })
+            });
+            if(response.ok) {
+                setAnswerBody('');
+                setIsAnonymous(false);
+                fetchQuestion(); // Re-fetch to show new answer
+                setNotification({type: 'success', message: 'Answer posted!'});
+            } else {
+                const data = await response.json();
+                setNotification({type: 'error', message: data.message || 'Failed to post answer.'});
+            }
+        } catch (error) {
+            setNotification({type: 'error', message: 'Could not connect to server.'});
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleVote = async (answerId, voteType) => {
+        try {
+            const response = await fetch(`http://localhost:3001/api/answers/${answerId}/vote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ voteType })
+            });
+            if (response.ok) {
+                fetchQuestion(); // Refresh to show new vote count
+            }
+        } catch (error) {
+            console.error("Vote failed", error);
+        }
+    };
+
+    if (isLoading) return <div className="py-8"><Spinner /></div>;
+    if (!question) return <div className="text-center py-8">Question not found.</div>;
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <div className="bg-white p-8 rounded-lg shadow-md">
+                <h1 className="text-3xl font-bold text-gray-800">{question.title}</h1>
+                <p className="text-sm text-gray-500 mt-2">Asked by {question.isAnonymous ? 'Anonymous' : question.authorEmail.split('@')[0]}</p>
+                <hr className="my-6" />
+                <p className="text-gray-700 leading-relaxed">{question.body}</p>
+            </div>
+
+            <h2 className="text-2xl font-bold mt-10 mb-4">{question.answers.length} Answers</h2>
+            <div className="space-y-6">
+                {question.answers.map(ans => (
+                    <div key={ans.id} className="bg-white p-6 rounded-lg shadow-md flex items-start">
+                        <div className="flex flex-col items-center mr-4">
+                            <button onClick={() => handleVote(ans.id, 'up')} className="text-gray-500 hover:text-green-500 transition-colors">▲</button>
+                            <span className="text-xl font-bold">{ans.votes}</span>
+                            <button onClick={() => handleVote(ans.id, 'down')} className="text-gray-500 hover:text-red-500 transition-colors">▼</button>
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-gray-700">{ans.body}</p>
+                            <p className="text-sm text-gray-500 mt-4">Answered by {ans.isAnonymous ? 'Anonymous' : ans.authorEmail.split('@')[0]}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <form onSubmit={handleAnswerSubmit} className="bg-white p-8 rounded-lg shadow-md mt-10 space-y-4">
+                <h2 className="text-2xl font-bold">Your Answer</h2>
+                <textarea value={answerBody} onChange={e => setAnswerBody(e.target.value)} required rows="8" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                <div className="flex items-center">
+                    <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} id="anonymous-answer" className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                    <label htmlFor="anonymous-answer" className="ml-2 block text-sm text-gray-900">Post Anonymously</label>
+                </div>
+                <button type="submit" disabled={isSubmitting} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors">
+                    {isSubmitting ? 'Submitting...' : 'Post Your Answer'}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+const LeaderboardPage = () => {
+    const [leaderboard, setLeaderboard] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchLeaderboard = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/api/leaderboard');
+                const data = await response.json();
+                setLeaderboard(data);
+            } catch (error) {
+                console.error("Failed to fetch leaderboard", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchLeaderboard();
+    }, []);
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold mb-6 text-center">🏆 Leaderboard 🏆</h1>
+            {isLoading ? <Spinner /> : (
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table className="min-w-full">
+                        <thead className="bg-gray-200">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Rank</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">User</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Points</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {leaderboard.map((user, index) => (
+                                <tr key={user.email} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 whitespace-nowrap text-lg font-bold">{index + 1}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{user.email.split('@')[0]}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap font-semibold">{user.points}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const AdminPage = () => {
+    // This is a placeholder for the admin moderation page.
+    // In a real app, this would fetch reported content.
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold mb-6">Admin Moderation</h1>
+            <div className="bg-white p-8 rounded-lg shadow-md">
+                <p>This is where admins would review and moderate reported content.</p>
+                <p className="mt-4 text-gray-600">No reported posts at the moment.</p>
+            </div>
+        </div>
+    );
+}
+
+// --- Main App Component ---
+
+export default function App() {
+    const [page, setPage] = useState('login'); // 'login', 'register', 'dashboard', 'ask', 'questionDetail', 'leaderboard', 'admin'
+    const [user, setUser] = useState(null);
+    const [selectedQuestionId, setSelectedQuestionId] = useState(null);
+    const [notification, setNotification] = useState(null); // { type: 'success' | 'error', message: '...' }
+
+    useEffect(() => {
+        if(notification) {
+            const timer = setTimeout(() => setNotification(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
+
+    const renderPage = () => {
+        if (!user) {
+            switch (page) {
+                case 'register':
+                    return <RegisterPage setPage={setPage} setUser={setUser} setNotification={setNotification} />;
+                case 'login':
+                default:
+                    return <LoginPage setPage={setPage} setUser={setUser} setNotification={setNotification} />;
+            }
+        }
+
+        switch (page) {
+            case 'ask':
+                return <AskQuestionPage setPage={setPage} user={user} setNotification={setNotification} />;
+            case 'questionDetail':
+                return <QuestionDetailPage questionId={selectedQuestionId} user={user} setNotification={setNotification} />;
+            case 'leaderboard':
+                return <LeaderboardPage />;
+            case 'admin':
+                return user.isAdmin ? <AdminPage /> : <Dashboard setPage={setPage} setSelectedQuestionId={setSelectedQuestionId} user={user} />;
+            case 'dashboard':
+            default:
+                return <Dashboard setPage={setPage} setSelectedQuestionId={setSelectedQuestionId} user={user} />;
+        }
+    };
+    
+    return (
+        <div className="bg-gray-100 min-h-screen font-sans">
+             <MessageBox message={notification?.message} type={notification?.type} />
+            {user && <Header user={user} setPage={setPage} setUser={setUser} />}
+            <main>
+                {renderPage()}
+            </main>
+        </div>
+    );
+}

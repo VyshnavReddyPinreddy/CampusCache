@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove conflicting button styles that override Tailwind */
+button {
+  font-family: inherit;
+}
+
+/* Remove conflicting link styles */
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/* Remove conflicting h1 styles */
+h1 {
+  font-size: inherit;
+  line-height: inherit;
+}
