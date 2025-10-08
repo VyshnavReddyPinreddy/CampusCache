@@ -1,36 +1,36 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const answerSchema = new mongoose.Schema({
-    content:{
-        type:String,
-        required:true
+    content: {
+        type: String,
+        required: true
     },
-    question:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true,
-        ref:"Question"
+    question: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "Question"
     },
-    author:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true,
-        ref:"User"
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "User"
     },
-    isAnonymous:{
-        type:Boolean,
-        default:false
+    isAnonymous: {
+        type: Boolean,
+        default: false
     },
-    score:{
-        type:Number,
-        default:0
+    score: {
+        type: Number,
+        default: 0
     },
-    updated:{
-        type:Boolean,
-        default:false
+    updated: {
+        type: Boolean,
+        default: false
     },
-    updatedAt:{
-        type:Date,
-        default:Date.now()
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
 });
 
-module.exports=mongoose.model("Answer",answerSchema);
+export default mongoose.model("Answer", answerSchema);

@@ -1,6 +1,6 @@
-const User = require("../models/User")
+import User from "../models/User"
 
-exports.fetchUserPoints = async (req,res) => {
+export const fetchUserPoints = async (req,res) => {
     try{
         const userDetails=await User.find().select("firstName lastName points");
 
@@ -17,7 +17,7 @@ exports.fetchUserPoints = async (req,res) => {
     }
 }
 
-exports.fetchSingleUserPoints=async (req,res) => {
+export const fetchSingleUserPoints=async (req,res) => {
     const userId=req.user.id;
 
     try{

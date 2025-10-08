@@ -1,7 +1,7 @@
-const Vote =require("../models/Votes")
+import Vote from "../models/Votes";
 
 
-exports.upvoteAnswer= async (req,res)=>{
+export const upvoteAnswer= async (req,res)=>{
 
     const userId=req.user.id
 

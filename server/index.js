@@ -1,17 +1,22 @@
-const express =require("express")
-const app = express()
-const database=require("./config/database")
-const cookieParser=require("cookie-parser")
-require("dotenv").config()
+import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import  connectDB from "./config/database.js"; // Note the .js extension
 
-database.connect();
+// Load environment variables
+dotenv.config();
 
-const PORT=process.env.PORT||4000
-app.use(express.json())
-app.use(cookieParser())
+const app = express();
+const PORT = process.env.PORT || 4000;
+
+// Connect to the database
+connectDB();
+
+// Apply middleware
+app.use(express.json());
+app.use(cookieParser());
 
 
-app.listen(PORT,()=>{
+app.listen(PORT, () => {
     console.log(`Server running on port no: ${PORT}`);
-})
-
+});
