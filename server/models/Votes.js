@@ -1,23 +1,23 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose";
 
-const voteSchema=mongoose.Schema({
-    voter:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true,
-        ref:"User"
+const voteSchema = new mongoose.Schema({
+    voter: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "User"
     },
-    contentId:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true
+    contentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
     },
-    contentType:{
-        type:String,
-        required:true,
-        enum:["Answer","Comment"]
+    contentType: {
+        type: String,
+        required: true,
+        enum: ["Answer", "Comment"]
     },
-    voteType:{
-        type:Number
+    voteType: {
+        type: Number // Should be 1 for upvote, -1 for downvote
     }
 });
 
-module.exports=mongoose.model("Vote",voteSchema);
+export default mongoose.model("Vote", voteSchema);

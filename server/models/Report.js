@@ -1,28 +1,29 @@
-const mongoose=require("mongoose");
+import mongoose from "mongoose";
 
-const reportSchema=mongoose.Schema({
-    contentId:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true
+const reportSchema = new mongoose.Schema({
+    contentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
     },
-    contentType:{
-        type:String,
-        required:true,
-        enum:["Question","Answer","Comment"]
+    contentType: {
+        type: String,
+        required: true,
+        enum: ["Question", "Answer", "Comment"]
     },
-    reportedBy:{
-        type:Stirng,
-        required:true,
-        ref:"User"
+    reportedBy: {
+        type: String, // Corrected from Stirng
+        required: true,
+        ref: "User"
     },
-    reason:{
-        type:String,
-        required:true
+    reason: {
+        type: String,
+        required: true
     },
-    status:{
-        type:String,
-        enum:["Pending","Resolved"]
+    status: {
+        type: String,
+        enum: ["Pending", "Resolved"],
+        default: "Pending" // Added a default status
     }
 });
 
-module.exports=mongoose.model("Report",reportSchema);
+export default mongoose.model("Report", reportSchema);
