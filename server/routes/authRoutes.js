@@ -1,17 +1,28 @@
 import express from 'express';
-import {resetPassword, sendResetOtp, isAuthenticated, login, logout, register, sendVerifyOtp, verifyEmail} from '../controllers/authController.js';
+import {
+    register,
+    verifyRegistration,
+    login,
+    logout,
+    isAuthenticated,
+    sendResetOtp,
+    resetPassword
+} from '../controllers/authController.js';
 import userAuth from '../middlewares/userAuth.js';
 
 const authRouter = express.Router();
 
-authRouter.post('/register',register); 
-authRouter.post('/login',login);
-authRouter.post('/logout',logout);
-authRouter.post('/send-verify-otp',userAuth,sendVerifyOtp);
-authRouter.post('/verify-account',userAuth,verifyEmail);
-authRouter.post('/is-auth',userAuth,isAuthenticated);
-authRouter.post('/send-reset-otp',sendResetOtp);
-authRouter.post('/reset-password',resetPassword);
+// New Registration Flow
+authRouter.post('/register', register);
+authRouter.post('/verify-registration', verifyRegistration);
 
- 
+// Standard Auth Routes
+authRouter.post('/login', login);
+authRouter.post('/logout', logout);
+authRouter.get('/is-auth', userAuth, isAuthenticated);
+
+// Password Reset Flow
+authRouter.post('/send-reset-otp', sendResetOtp);
+authRouter.post('/reset-password', resetPassword);
+ 
 export default authRouter;
