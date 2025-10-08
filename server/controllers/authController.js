@@ -29,9 +29,10 @@ export const register = async (request,response)=>{
             name,
             email,
             password:hashedPassword,
-            verificationOtp: otp,
-            verificationOtpExpires: Date.now() + 15 * 60 * 1000 // OTP expires in 15 minutes
+            verifyOtp: otp,
+            verifyOtpExpireAt: Date.now() + 15 * 60 * 1000 // OTP expires in 15 minutes
         });
+
 
         await user.save();
         console.log(user);
@@ -66,18 +67,20 @@ export const verifyRegistration = async (request, response) => {
         if (user.isAccountVerified) {
             return response.status(400).json({ success: false, message: "Account already verified." });
         }
+
+    
         
-        if (user.verificationOtp !== otp) {
+        if (user.verifyOtp !== otp) {
             return response.status(400).json({ success: false, message: "Invalid OTP." });
         }
 
-        if (user.verificationOtpExpires < Date.now()) {
+        if (user.verifyOtpExpireAt < Date.now()) {
             return response.status(400).json({ success: false, message: "OTP has expired. Please register again to get a new one." });
         }
 
         user.isAccountVerified = true;
-        user.verificationOtp = '';
-        user.verificationOtpExpires = 0;
+        user.verifyOtp = '';
+        user.verifyOtpExpireAt = 0;
         await user.save();
 
         const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:'1d'});
@@ -165,8 +168,8 @@ export const sendResetOtp = async (request,response)=>{
         }
         const otp = String(Math.floor(100000+Math.random()*900000));
 
-        user.passwordResetOtp = otp;
-        user.passwordResetOtpExpires = Date.now()+15*60*1000;
+        user.resetOtp = otp;
+        user.resetOtpExpireAt = Date.now()+15*60*1000;
 
         await user.save();
 
@@ -197,19 +200,19 @@ export const resetPassword = async  (request,response)=>{
             return response.status(404).json({success:false,message:"User not found"});
         }
 
-        if(user.passwordResetOtp==='' || user.passwordResetOtp!==otp){
+        if(user.resetOtp==='' || user.resetOtp!==otp){
             return response.status(400).json({success:false,message:"Invalid Otp"}); 
         }
 
-        if(user.passwordResetOtpExpires<Date.now()){
+        if(user.resetOtpExpireAt<Date.now()){
             return response.status(400).json({success:false,message:"Otp Expired"}); 
         }
 
         const hashedPassword = await bcrypt.hash(newPassword,10);
         
         user.password = hashedPassword;
-        user.passwordResetOtp = undefined;
-        user.passwordResetOtpExpires = undefined;
+        user.resetOtp = '';
+        user.resetOtpExpireAt = 0;
 
         await user.save();
         return response.status(200).json({success:true,message:"Password reset Successfull"});

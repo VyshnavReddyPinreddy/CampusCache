@@ -31,11 +31,13 @@ const userSchema = new mongoose.Schema({
     resetOtpExpireAt:{type:Number,default:0},
 });
 
-// Pre-save hook to hash password
-userSchema.pre("save", async function(next) {
-    if (!this.isModified("password")) return next();
-    this.password = await bcrypt.hash(this.password, 12);
-    next();
-});
+// // Pre-save hook to hash password
+// userSchema.pre("save", async function(next) {
+//     if (!this.isModified("password")) return next();
+//     this.password = await bcrypt.hash(this.password, 10);
+//     next();
+// });
 
-export default mongoose.model("user", userSchema);
+const userModel = mongoose.models.user || mongoose.model('user',userSchema);
+
+export default userModel; 

@@ -12,7 +12,7 @@ const userAuth = async (request,response,next)=>{
             request.body.userId = tokenDecoded.id; 
         }else{
             return response.json({success:false,message:"Not authorized. Login Again"});
-        }
+        } 
         next();
     }catch(error){
         return response.json({success:false,message:error.message});
