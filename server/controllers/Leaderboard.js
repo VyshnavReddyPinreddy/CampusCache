@@ -38,7 +38,7 @@ export const fetchSingleUserPoints=async (req,res) => {
 
 //update user points
 
-exports.updateUserPoints = async (req,res)=>{ 
+export const updateUserPoints = async (req,res)=>{ 
     const userId=req.user.id
     const newPoints=req.points
 

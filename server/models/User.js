@@ -24,14 +24,11 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    isVerified: {
-        type: Boolean,
-        default: false,
-    },
-    verificationOtp: String,
-    verificationOtpExpires: Date,
-    passwordResetOtp: String,
-    passwordResetOtpExpires: Date,
+    verifyOtp:{type:String,default:''},
+    verifyOtpExpireAt:{type:Number,default:0},
+    isAccountVerified:{type:Boolean,default:false},
+    resetOtp:{type:String,default:''},  
+    resetOtpExpireAt:{type:Number,default:0},
 });
 
 // Pre-save hook to hash password
@@ -41,4 +38,4 @@ userSchema.pre("save", async function(next) {
     next();
 });
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model("user", userSchema);

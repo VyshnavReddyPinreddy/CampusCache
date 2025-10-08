@@ -1,22 +1,21 @@
 import express from "express";
-import dotenv from "dotenv";
+import cors from "cors";
+import 'dotenv/config';
 import cookieParser from "cookie-parser";
-import  connectDB from "./config/database.js"; // Note the .js extension
-
-// Load environment variables
-dotenv.config();
+import connectDB from "./config/database.js";
+import authRouter from './routes/authRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const port = process.env.PORT || 4000;
+connectDB(); 
 
-// Connect to the database
-connectDB();
-
-// Apply middleware
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({origin: "http://localhost:5173",credentials:true,}));
+
+//API endpoints
+app.get('/',(request,response)=>{response.send("API WORKING")});
+app.use('/api/auth',authRouter);
 
 
-app.listen(PORT, () => {
-    console.log(`Server running on port no: ${PORT}`);
-});
+app.listen(port,()=>console.log(`Server running on PORT : ${port}`));
