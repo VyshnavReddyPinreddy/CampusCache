@@ -35,3 +35,35 @@ export const fetchSingleUserPoints=async (req,res) => {
         })
     }
 }
+
+//update user points
+
+exports.updateUserPoints = async (req,res)=>{ 
+    const userId=req.user.id
+    const newPoints=req.points
+
+    if(!userId||!newPoints){
+        return res.status(407).json({
+            success:false,
+            message:"Missing required fields"
+        })
+    }
+
+    try{
+        const updatedPoints= await User.findByIdAndUpdate(userId,
+            {$inc:{points:newPoints} },
+            {new:true}
+        )
+
+        return res.status(200).json({
+            success:true,
+            message:"succesfully updated user points",
+            updatedPoints
+        })
+    }catch(error){
+        return res.status(406).json({
+            success:false,
+            message:error.message
+        })
+    }
+}
