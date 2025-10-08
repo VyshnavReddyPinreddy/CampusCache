@@ -4,6 +4,7 @@ import 'dotenv/config';
 import cookieParser from "cookie-parser";
 import connectDB from "./config/database.js";
 import authRouter from './routes/authRoutes.js';
+import leaderboardRouter from "./routes/leaderboardRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -16,6 +17,6 @@ app.use(cors({origin: "http://localhost:5173",credentials:true,}));
 //API endpoints
 app.get('/',(request,response)=>{response.send("API WORKING")});
 app.use('/api/auth',authRouter);
-
+app.use('/api/points',leaderboardRouter)
 
 app.listen(port,()=>console.log(`Server running on PORT : ${port}`));

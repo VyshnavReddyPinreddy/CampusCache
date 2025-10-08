@@ -1,8 +1,8 @@
-import User from "../models/User"
+import User from "../models/User.js"
 
 export const fetchUserPoints = async (req,res) => {
     try{
-        const userDetails=await User.find().select("firstName lastName points");
+        const userDetails=await User.find().select("name points").sort({points:-1});
 
         return res.status(200).json({
             success:true,
@@ -18,10 +18,10 @@ export const fetchUserPoints = async (req,res) => {
 }
 
 export const fetchSingleUserPoints=async (req,res) => {
-    const userId=req.user.id;
-
+    const userId=req.body.userId;
+    console.log(userId);
     try{
-        const userPoints=await User.findById(id).select("points")
+        const userPoints=await User.findById(userId).select("points")
 
         return res.status(200).json({
             success:true,
@@ -39,9 +39,9 @@ export const fetchSingleUserPoints=async (req,res) => {
 //update user points
 
 export const updateUserPoints = async (req,res)=>{ 
-    const userId=req.user.id
-    const newPoints=req.points
-
+    const userId=req.body.userId
+    const newPoints=req.body.points
+    console.log(userId,req.body);
     if(!userId||!newPoints){
         return res.status(407).json({
             success:false,

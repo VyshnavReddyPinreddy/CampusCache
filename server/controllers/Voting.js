@@ -1,10 +1,8 @@
 import Vote from "../models/Votes";
 const Vote =require("../models/Votes")
 const Answer=require("../models/Answer")
-const Comment=require("../models/Comment")
 
-
-export const upvoteAnswer= async (req,res)=>{
+export const voteAnswer= async (req,res)=>{
 
     const userId=req.user.id
 
@@ -18,19 +16,19 @@ export const upvoteAnswer= async (req,res)=>{
     }
     try{
 
-        const userVote= await Vote.find({voter:userId,contentId:answerId})
+        const userVote= await Vote.find({voter:userId,answerId})
         
         if(userVote){
             if(voteDirection===userVote.voteType){
 
-                const deletedVote = await Vote.findOneAndDelete({voter:userId,contentId:answerId})
+                const deletedVote = await Vote.findOneAndDelete({voter:userId,answerId})
                 return res.status(200).json({
                     success:false,
                     message:"vote deleted",
                     deletedVote
                 })
             }else{
-                const updateVote=await Vote.findOneAndUpdate({voter:userId,contentId:answerId},
+                const updateVote=await Vote.findOneAndUpdate({voter:userId,answerId},
                     {$set:{voteType:voteDirection}},
                     {new:true})
 
@@ -51,7 +49,7 @@ export const upvoteAnswer= async (req,res)=>{
 
         const newVote= new Vote({
             voter:userId,
-            contentId:answerId,
+            answerId,
             contentType:"Answer",
             voteType:voteDirection
         })
@@ -77,74 +75,3 @@ export const upvoteAnswer= async (req,res)=>{
     }
 }
 
-//up down vote comment
-exports.voteAnswer= async (req,res)=>{
-
-    const userId=req.user.id
-    const {commentId,voteDirection}=req.body
-
-    if(!commentId||!userId||!voteDirection){
-        return res.status(406).json({
-            success:false,
-            message:"not provided required fields"
-        })
-    }
-    try{
-
-        const userVote= await Vote.find({voter:userId,contentId:commentId})
-        
-        if(userVote){
-            if(voteDirection===userVote.voteType){
-                const deletedVote = await Vote.findOneAndDelete({voter:userId,contentId:commentId})
-                return res.status(200).json({
-                    success:false,
-                    message:"vote deleted",
-                    deletedVote
-                })
-            }else{
-                const updateVote=await Vote.findOneAndUpdate({voter:userId,contentId:commentId},
-                    {$set:{voteType:voteDirection}},
-                    {new:true})
-
-                const updatedAnswerVoteCount=await Comment.findByIdAndUpdate(commentId,
-                    {$inc:{score:2*voteDirection}},
-                    {new:true}
-                )
-                
-                return res.status(200).json({
-                    success:true,
-                    message:"Vote modified",
-                    updateVote,
-                    updatedAnswerVoteCount
-                })
-            }
-            
-        }
-
-        const newVote= new Vote({
-            voter:userId,
-            contentId:commentId,
-            contentType:"Answer",
-            voteType:voteDirection
-        })
-
-        const savedVote=await newVote.save();
-
-        const updatedAnswerVoteCount=await Comment.findByIdAndUpdate(answerId,
-                    {$inc:{score:voteDirection}},
-                    {new:true}
-                )
-
-        return res.status(200).json({
-            success:true,
-            message:"successfully added new vote",
-            savedVote,
-            updatedAnswerVoteCount
-        })
-    }catch(error){
-        return res.status(406).json({
-            success:false,
-            message:error.message
-        })
-    }
-}

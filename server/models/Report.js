@@ -8,7 +8,7 @@ const reportSchema = new mongoose.Schema({
     contentType: {
         type: String,
         required: true,
-        enum: ["Question", "Answer", "Comment"]
+        enum: ["Question", "Answer"]
     },
     reportedBy: {
         type: String, // Corrected from Stirng
@@ -22,7 +22,7 @@ const reportSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ["Pending", "Resolved"],
-        default: "Pending" // Added a default status
+        default: "Pending" 
     }
 });
 
