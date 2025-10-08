@@ -23,7 +23,8 @@ const userSchema= new mongoose.Schema({
         enum:["Student","Admin"]
     },
     points:{
-        type:int
+        type:Number,
+        default:0
     }
 });
 
