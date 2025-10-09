@@ -27,9 +27,21 @@ const questionSchema = new mongoose.Schema({
         default: false
     },
     updatedAt: {
-        type: Date, // Corrected from Date()
+        type: Date,
         default: Date.now
     }
+});
+
+// Add text indexes for better search capabilities
+questionSchema.index({ 
+    title: 'text', 
+    tags: 'text'
+}, {
+    weights: {
+        title: 10,    // Title matches are most important
+        tags: 8       // Tag matches are more important than content but less than title
+    },
+    name: "QuestionTextIndex"
 });
 
 export default mongoose.model("Question", questionSchema);

@@ -7,6 +7,7 @@ import connectDB from "./config/database.js";
 import authRouter from './routes/authRoutes.js';
 import leaderboardRouter from "./routes/leaderboardRoutes.js";
 import voteRouter from "./routes/voteRoutes.js";
+import questionRouter from "./routes/questionRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -22,5 +23,6 @@ app.get('/',(request,response)=>{response.send("API WORKING")});
 app.use('/api/auth',authRouter);
 app.use('/api/points',leaderboardRouter)
 app.use('/api/vote',voteRouter);
+app.use('/api/question',questionRouter);
 
 app.listen(port,()=>console.log(`Server running on PORT : ${port}`));
