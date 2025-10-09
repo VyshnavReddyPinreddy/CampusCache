@@ -35,7 +35,7 @@ export const register = async (request,response)=>{
 
 
         await user.save();
-        console.log(user);
+        
         // Send verification email
         const mailOptions = {
             from: process.env.SENDER_EMAIL,
@@ -44,7 +44,6 @@ export const register = async (request,response)=>{
             html : EMAIL_VERIFY_TEMPLATE.replace("{{otp}}",otp).replace("{{email}}",user.email)
         }
         await transporter.sendMail(mailOptions);
-        console.log(mailOptions);
         return response.status(200).json({success:true,message:"Registration successful! Please check your email to verify your account."});
 
     }catch(error){
@@ -67,8 +66,6 @@ export const verifyRegistration = async (request, response) => {
         if (user.isAccountVerified) {
             return response.status(400).json({ success: false, message: "Account already verified." });
         }
-
-    
         
         if (user.verifyOtp !== otp) {
             return response.status(400).json({ success: false, message: "Invalid OTP." });

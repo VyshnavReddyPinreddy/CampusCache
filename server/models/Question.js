@@ -11,7 +11,7 @@ const questionSchema = new mongoose.Schema({
     },
     tags: [{
         type: String,
-        required: true
+        required: true 
     }],
     author: {
         type: mongoose.Schema.Types.ObjectId,

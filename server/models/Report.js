@@ -11,18 +11,33 @@ const reportSchema = new mongoose.Schema({
         enum: ["Question", "Answer"]
     },
     reportedBy: {
-        type: String, // Corrected from Stirng
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: "User"
     },
-    reason: {
+    reasons: [{
         type: String,
-        required: true
-    },
+        required: true,
+        enum: ['Spam', 'Hate Speech', 'Explicit Content', 'Misinformation', 'Harassment']
+    }],
     status: {
         type: String,
-        enum: ["Pending", "Resolved"],
-        default: "Pending" 
+        enum: ["Pending", "In Progress","Resolved"],
+        default: "Pending"
+    },
+    reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    actionTaken: {
+        type: String,
+        enum: ['Content Deleted', 'No Action Needed'],
+    },
+    adminNotes: {
+        type: String
+    },
+    resolvedAt: {
+        type: Date
     }
 });
 
