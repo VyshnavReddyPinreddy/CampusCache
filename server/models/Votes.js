@@ -8,7 +8,8 @@ const voteSchema = new mongoose.Schema({
     },
     answerId: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref:"Answer"
     },
     voteType: {
         type: Number // Should be 1 for upvote, -1 for downvote
