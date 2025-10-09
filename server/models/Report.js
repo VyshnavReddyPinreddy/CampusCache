@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 const reportSchema = new mongoose.Schema({
     contentId: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        refPath: 'contentType'
+        required: true
     },
     contentType: {
         type: String,

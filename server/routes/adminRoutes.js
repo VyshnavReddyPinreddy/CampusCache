@@ -6,7 +6,7 @@ import {
     resolveReport
 } from '../controllers/adminController.js';
 
-const adminRouter = express.Router();
+const adminRouter = express.Router(); 
 
 adminRouter.get('/reports/pending', adminAuth, getPendingReports);
 
