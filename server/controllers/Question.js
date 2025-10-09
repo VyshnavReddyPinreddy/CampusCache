@@ -21,7 +21,13 @@ export const addQuestion = async (req,res)=>{
     }
     //checking if user exitsts??
     try{
-
+        const userDetails= await User.findById(userId);
+        if(!userDetails){
+            return res.status(400).json({
+                success:false,
+                message:"User doesnt exists"
+            })
+        }
         const newQuestion = new Question({
             title,
             content,
@@ -194,3 +200,4 @@ export const deleteQuestion =async(req,res)=>{
         })
     }
 }
+

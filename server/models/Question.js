@@ -21,14 +21,6 @@ const questionSchema = new mongoose.Schema({
     isAnonymous: {
         type: Boolean,
         default: false
-    },
-    updated: {
-        type: Boolean,
-        default: false
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
     }
 });
 

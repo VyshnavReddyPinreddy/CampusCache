@@ -22,14 +22,6 @@ const answerSchema = new mongoose.Schema({
     score: {
         type: Number,
         default: 0
-    },
-    updated: {
-        type: Boolean,
-        default: false
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
     }
 });
 
