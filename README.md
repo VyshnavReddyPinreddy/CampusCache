@@ -71,7 +71,7 @@ To get a local copy up and running, follow these simple steps.
     npm install
     ```
 
-3.  **Run the client:**
+3.  **Run the client:** 
     ```sh
     npm start
     ```

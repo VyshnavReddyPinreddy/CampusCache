@@ -8,7 +8,9 @@ const userAuth = async (request,response,next)=>{
     try{ 
         const tokenDecoded = jwt.verify(token,process.env.JWT_SECRET);
         if(tokenDecoded.id){
-            request.userId = tokenDecoded.id;  // Add userId to request object directly
+            request.userId = tokenDecoded.id;  // For direct access in controllers
+            if (!request.body) request.body = {};  // Ensure request.body exists
+            request.body.userId = tokenDecoded.id; // For controllers accessing from body
         }else{
             return response.status(401).json({success:false,message:"Not authorized. Login Again"});
         } 
