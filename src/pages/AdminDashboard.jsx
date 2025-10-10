@@ -20,14 +20,18 @@ const AdminDashboard = () => {
   // Check authentication and admin status
   useEffect(() => {
     const checkAuth = async () => {
+      // Wait for the initial auth check to complete
+      if (isLoading) {
+        return;
+      }
+
+      // After loading, check login status
       if (!isLoggedin) {
-        // If not logged in, redirect
         navigate('/login');
         return;
       }
 
       if (!userData) {
-        // If logged in but no user data, fetch it
         try {
           await getUserData();
         } catch (error) {
@@ -37,7 +41,7 @@ const AdminDashboard = () => {
         return;
       }
 
-      if (userData.role !== 'Admin') {
+      if (userData?.role !== 'Admin') {
         toast.error('Admin access required');
         navigate('/');
         return;
@@ -150,27 +154,27 @@ const AdminDashboard = () => {
   };
 
   const renderReportCard = (report) => (
-    <div key={report._id} className="bg-slate-900 p-4 rounded-lg shadow-md mb-4">
+    <div key={report._id} className="bg-white p-4 rounded-lg shadow-md mb-4">
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-medium text-indigo-300">Reported By:</span>
-            <span className="text-sm text-indigo-200">{report.reportedBy.name}</span>
+            <span className="text-sm font-medium text-gray-600">Reported By:</span>
+            <span className="text-sm text-gray-800">{report.reportedBy.name}</span>
           </div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-medium text-indigo-300">Content Type:</span>
-            <span className="text-sm text-indigo-200">{report.contentType}</span>
+            <span className="text-sm font-medium text-gray-600">Content Type:</span>
+            <span className="text-sm text-gray-800">{report.contentType}</span>
           </div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-medium text-indigo-300">Reason:</span>
-            <span className="text-sm text-indigo-200">{report.reason}</span>
+            <span className="text-sm font-medium text-gray-600">Reason:</span>
+            <span className="text-sm text-gray-800">{report.reason}</span>
           </div>
-          <p className="text-sm text-indigo-300 mt-2">{report.description}</p>
+          <p className="text-sm text-gray-700 mt-2">{report.description}</p>
           {report.status === 'Resolved' && (
-            <div className="mt-2 p-2 bg-slate-800 rounded">
-              <p className="text-sm text-indigo-300">Action Taken: {report.actionTaken}</p>
-              <p className="text-sm text-indigo-300">Admin Notes: {report.adminNotes}</p>
-              <p className="text-sm text-indigo-300">Resolved At: {new Date(report.resolvedAt).toLocaleString()}</p>
+            <div className="mt-2 p-2 bg-gray-50 rounded">
+              <p className="text-sm text-gray-600">Action Taken: {report.actionTaken}</p>
+              <p className="text-sm text-gray-600">Admin Notes: {report.adminNotes}</p>
+              <p className="text-sm text-gray-600">Resolved At: {new Date(report.resolvedAt).toLocaleString()}</p>
             </div>
           )}
         </div>
@@ -178,7 +182,7 @@ const AdminDashboard = () => {
           {report.status === 'Pending' && (
             <button
               onClick={() => handleClaim(report.contentId)}
-              className="bg-indigo-600 text-indigo-200 px-4 py-2 rounded text-sm hover:bg-indigo-700 transition-colors"
+              className="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition-colors"
             >
               Claim Report
             </button>
@@ -187,13 +191,13 @@ const AdminDashboard = () => {
             <>
               <button
                 onClick={() => handleResolve(report._id, 'Content Deleted')}
-                className="bg-red-600 text-indigo-200 px-4 py-2 rounded text-sm hover:bg-red-700 transition-colors"
+                className="bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600 transition-colors"
               >
                 Delete Content
               </button>
               <button
                 onClick={() => handleResolve(report._id, 'No Action Needed')}
-                className="bg-green-600 text-indigo-200 px-4 py-2 rounded text-sm hover:bg-green-700 transition-colors"
+                className="bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600 transition-colors"
               >
                 Mark Safe
               </button>
@@ -206,12 +210,12 @@ const AdminDashboard = () => {
 
   if (isLoading || isCheckingAuth) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
+      <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="container mx-auto px-4 py-8 mt-16">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-300 mx-auto"></div>
-            <p className="mt-4 text-indigo-300">Loading...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading...</p>
           </div>
         </div>
       </div>
@@ -222,10 +226,10 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-indigo-300">Admin Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 bg-slate-800 text-indigo-300 px-4 py-2 rounded hover:bg-slate-700 transition-colors"
+            className="flex items-center gap-2 bg-white text-indigo-700 px-4 py-2 rounded transition-all duration-200 hover:bg-gradient-to-r hover:from-indigo-500 hover:to-indigo-900 hover:text-white border border-indigo-500 hover:border-transparent hover:cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
@@ -238,30 +242,30 @@ const AdminDashboard = () => {
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setActiveTab('pending')}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors flex-1 ${
+            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex-1 hover:cursor-pointer ${
               activeTab === 'pending'
-                ? 'bg-slate-800 text-indigo-300'
-                : 'bg-slate-900 text-indigo-300 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-indigo-500 to-indigo-900 text-white'
+                : 'bg-white text-indigo-700 hover:bg-gradient-to-r hover:from-indigo-500 hover:to-indigo-900 hover:text-white border border-indigo-500 hover:border-transparent'
             }`}
           >
             Pending Reports
           </button>
           <button
             onClick={() => setActiveTab('inProcess')}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors flex-1 ${
+            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex-1 hover:cursor-pointer ${
               activeTab === 'inProcess'
-                ? 'bg-slate-800 text-indigo-300'
-                : 'bg-slate-900 text-indigo-300 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-indigo-500 to-indigo-900 text-white'
+                : 'bg-white text-indigo-700 hover:bg-gradient-to-r hover:from-indigo-500 hover:to-indigo-900 hover:text-white border border-indigo-500 hover:border-transparent'
             }`}
           >
             In Process Reports
           </button>
           <button
             onClick={() => setActiveTab('resolved')}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors flex-1 ${
+            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 flex-1 hover:cursor-pointer ${
               activeTab === 'resolved'
-                ? 'bg-slate-800 text-indigo-300'
-                : 'bg-slate-900 text-indigo-300 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-indigo-500 to-indigo-900 text-white'
+                : 'bg-white text-indigo-700 hover:bg-gradient-to-r hover:from-indigo-500 hover:to-indigo-900 hover:text-white border border-indigo-500 hover:border-transparent'
             }`}
           >
             Resolved Reports
@@ -276,8 +280,8 @@ const AdminDashboard = () => {
               <p className="mt-4 text-gray-600">Loading reports...</p>
             </div>
           ) : reports.length === 0 ? (
-            <div className="text-center py-8 bg-slate-900 rounded-lg shadow-md">
-              <p className="text-indigo-300">No {activeTab.replace(/([A-Z])/g, ' $1').toLowerCase()} reports found.</p>
+            <div className="text-center py-8 bg-white rounded-lg shadow-md">
+              <p className="text-gray-600">No {activeTab.replace(/([A-Z])/g, ' $1').toLowerCase()} reports found.</p>
             </div>
           ) : (
             <div className="space-y-4">
