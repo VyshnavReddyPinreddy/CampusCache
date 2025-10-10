@@ -14,6 +14,36 @@ export const getPendingReports = async (request, response) => {
     }
 };
 
+// Controller to get reports in process by the current admin
+export const getInProcessReports = async (request, response) => {
+    try {
+        const reports = await Report.find({ 
+            status: 'In Progress',
+            reviewedBy: request.userId
+        })
+        .populate('reportedBy', 'name email')
+        .sort({ createdAt: -1 });
+        return response.status(200).json({ success: true, reports });
+    } catch (error) {
+        return response.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Controller to get resolved reports by the current admin
+export const getResolvedReports = async (request, response) => {
+    try {
+        const reports = await Report.find({ 
+            status: 'Resolved',
+            reviewedBy: request.userId
+        })
+        .populate('reportedBy', 'name email')
+        .sort({ resolvedAt: -1 });
+        return response.status(200).json({ success: true, reports });
+    } catch (error) {
+        return response.status(500).json({ success: false, message: error.message });
+    }
+};
+
 export const claimReport = async (request, response) => {
     const {contentId} = request.params;
     const adminId = request.user._id;
