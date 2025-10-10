@@ -29,10 +29,6 @@ const reportSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    actionTaken: {
-        type: String,
-        enum: ['Content Deleted', 'No Action Needed'],
-    },
     resolvedAt: {
         type: Date
     }
