@@ -8,6 +8,11 @@ export const createReport = async (request, response) => {
     }
 
     try {
+        // Check for existing pending report by the same user on the same content
+        const existingReport = await Report.findOne({ reportedBy: userId, contentId});
+        if (existingReport) {
+            return response.status(400).json({ success: false, message: "You have already reported this content and it is under review." });
+        }
         const newReport = new Report({
             ...request.body,
             reportedBy: userId,

@@ -1,6 +1,7 @@
 import Report from '../models/Report.js';
 import Question from '../models/Question.js';
 import Answer from '../models/Answer.js';
+import userModel from '../models/User.js';
 
 // Controller to get all individual pending reports
 export const getPendingReports = async (request, response) => {
@@ -79,9 +80,15 @@ export const resolveReport = async (request, response) => {
             const contentType = reportsToResolve[0].contentType;
             const model = contentType==='Question' ? Question : Answer;
             if(model===Question){
+                const question = await Question.findById(contentId);
+                const authorId = question.author;
+                await userModel.findByIdAndUpdate(authorId, {$inc: {points: -20}});
                 await Answer.deleteMany({question:contentId});
                 await Question.findByIdAndDelete(contentId);
             }else if(contentType==='Answer'){
+                const answer = await Answer.findById(contentId);
+                const authorId = answer.author;
+                await userModel.findByIdAndUpdate(authorId, {$inc: {points: -20}});
                 await Answer.findByIdAndDelete(contentId);
             }
         }
