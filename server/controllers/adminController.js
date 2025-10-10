@@ -19,7 +19,7 @@ export const getInProcessReports = async (request, response) => {
     try {
         const reports = await Report.find({ 
             status: 'In Progress',
-            reviewedBy: request.userId
+            reviewedBy: request.body.userId
         })
         .populate('reportedBy', 'name email')
         .sort({ createdAt: -1 });
@@ -34,7 +34,7 @@ export const getResolvedReports = async (request, response) => {
     try {
         const reports = await Report.find({ 
             status: 'Resolved',
-            reviewedBy: request.userId
+            reviewedBy: request.body.userId
         })
         .populate('reportedBy', 'name email')
         .sort({ resolvedAt: -1 });

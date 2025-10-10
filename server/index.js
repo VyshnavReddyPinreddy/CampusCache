@@ -11,6 +11,7 @@ import adminRouter from './routes/adminRoutes.js';
 import questionRouter from "./routes/questionRoutes.js";
 import reportRouter from './routes/reportRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import answerRouter from "./routes/answerRoutes.js";
 
 
 const app = express();
@@ -31,5 +32,6 @@ app.use('/api/admin', adminRouter);
 app.use('/api/question', questionRouter);
 app.use('/api/report', reportRouter);
 app.use('/api/user', userRouter);
+app.use('/api/answer', answerRouter);
 
 app.listen(port,()=>console.log(`Server running on PORT : ${port}`));

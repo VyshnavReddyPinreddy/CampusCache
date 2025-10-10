@@ -1,10 +1,9 @@
 import Report from '../models/Report.js';
 
 export const createReport = async (request, response) => {
-    const { contentId, contentType, reasons, contentVersion } = request.body;
-    const userId = request.user._id;
+    const { userId,contentId, contentType, reasons} = request.body;
 
-    if (!contentId || !contentType || !reasons) {
+    if (!userId || !contentId || !contentType || !reasons) {
         return response.status(400).json({ success: false, message: "Missing required report details." });
     }
 
