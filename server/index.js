@@ -12,6 +12,7 @@ import questionRouter from "./routes/questionRoutes.js";
 import reportRouter from './routes/reportRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import answerRouter from "./routes/answerRoutes.js";
+import contentFetchRouter from "./routes/contentFetchRoutes.js";
 
 
 const app = express();
@@ -33,5 +34,6 @@ app.use('/api/question', questionRouter);
 app.use('/api/report', reportRouter);
 app.use('/api/user', userRouter);
 app.use('/api/answer', answerRouter);
+app.use('/api/fetch', contentFetchRouter);
 
 app.listen(port,()=>console.log(`Server running on PORT : ${port}`));

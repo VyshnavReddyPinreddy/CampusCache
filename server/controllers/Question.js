@@ -1,7 +1,7 @@
 import Question from "../models/Question.js";
 import Answer from "../models/Answer.js";
 import User from "../models/User.js";
-import Vote from "../models/Votes.js"
+import Vote from "../models/Votes.js";
 
 //post question
 export const addQuestion = async (req,res)=>{

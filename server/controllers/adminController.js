@@ -46,7 +46,7 @@ export const getResolvedReports = async (request, response) => {
 
 export const claimReport = async (request, response) => {
     const {contentId} = request.params;
-    const adminId = request.user._id;
+    const adminId = request.body.userId;
     try{
         const updateResult = await Report.updateMany(
             {contentId:contentId,status:'Pending'},
@@ -65,7 +65,7 @@ export const claimReport = async (request, response) => {
 export const resolveReport = async (request, response) => {
     const {contentId} = request.params;
     const {actionTaken,adminNotes} = request.body;
-    const adminId = request.user._id;
+    const adminId = request.body.userId;
     try{
         const reportsToResolve = await Report.find({
             contentId:contentId,
