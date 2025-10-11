@@ -11,12 +11,11 @@ export const register = async (request,response)=>{
     }
     // email should ends with @student.nitw.ac.in
     if(!email.endsWith('@student.nitw.ac.in')){
-        return response.status(400).json({success:false,message:"Please use valid nitw mail id."});
+        return response.status(400).json({success:false,message:"Use Institute Email only !"});
     }
-    // check whether password follows the criteria of at least 8 characters, one uppercase, one lowercase, one number and one special character
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;       
-    if(!passwordRegex.test(password)){
-        return response.status(400).json({success:false,message:"Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."});
+    // check whether password follows the criteria of at least 8 characters
+    if(password.length < 8){
+        return response.status(400).json({success:false,message:"Password must be at least 8 characters long."});
     }
     try{
         const existingUser = await userModel.findOne({email});
@@ -117,7 +116,7 @@ export const login = async (request,response)=>{
         }
             
         if(!email.endsWith('@student.nitw.ac.in') && user.role==='Student'){
-            return response.status(400).json({success:false,message:"Please use valid nitw mail id."});
+            return response.status(400).json({success:false,message:"Use Institute Email only !"});
         }
 
         if (!user.isAccountVerified) {
