@@ -209,7 +209,7 @@ const AdminDashboard = () => {
           {report.status === 'Pending' && (
             <button
               onClick={() => handleClaim(report.contentId)}
-              className="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition-colors"
+              className="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition-colors hover:cursor-pointer"
             >
               Claim Report
             </button>
@@ -218,13 +218,13 @@ const AdminDashboard = () => {
             <>
               <button
                 onClick={() => handleResolve(report.contentId, 'Content Deleted')}
-                className="bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600 transition-colors"
+                className="bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600 transition-colors hover:cursor-pointer"
               >
                 Delete Content
               </button>
               <button
                 onClick={() => handleResolve(report.contentId, 'No Action Needed')}
-                className="bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600 transition-colors"
+                className="bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600 transition-colors hover:cursor-pointer"
               >
                 Mark Safe
               </button>
