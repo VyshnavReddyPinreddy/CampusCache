@@ -9,20 +9,19 @@ export const register = async (request,response)=>{
     if(!name || !email || !password){
         return response.status(400).json({success:false,message:"Missing Details"});
     }
-
-    // Validate student email format
-    const role = request.body.role || "Student";  // Default to Student if not specified
-    if (role === "Student" && !email.endsWith("@student.nitw.ac.in")) {
-        return response.status(400).json({
-            success: false,
-            message: "Student email must end with @student.nitw.ac.in"
-        });
+    // email should ends with @student.nitw.ac.in
+    if(!email.endsWith('@student.nitw.ac.in')){
+        return response.status(400).json({success:false,message:"Please use valid nitw mail id."});
     }
-
+    // check whether password follows the criteria of at least 8 characters, one uppercase, one lowercase, one number and one special character
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;       
+    if(!passwordRegex.test(password)){
+        return response.status(400).json({success:false,message:"Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."});
+    }
     try{
         const existingUser = await userModel.findOne({email});
         if(existingUser && existingUser.isAccountVerified){
-             return response.status(400).json({success:false,message:"User already exists"});
+            return response.status(400).json({success:false,message:"User already exists"});
         }
 
         // If user exists but is not verified, delete them to start fresh
@@ -111,22 +110,14 @@ export const login = async (request,response)=>{
     if(!email || !password){
         return response.status(400).json({success:false,message:"Email and password are required!"});
     }
-
-    // Additional validation for student email
-    if (email.toLowerCase().endsWith("@student.nitw.ac.in")) {
-        const role = "Student";  // Force role to be Student for student email domains
-        request.body.role = role;
-    } else {
-        return response.status(400).json({
-            success: false,
-            message: "Please use your NITW email address"
-        });
-    }
-
     try{
         const user = await userModel.findOne({email});
         if(!user){
             return response.status(404).json({success:false,message:"Invalid Email!"});
+        }
+            
+        if(!email.endsWith('@student.nitw.ac.in') && user.role==='Student'){
+            return response.status(400).json({success:false,message:"Please use valid nitw mail id."});
         }
 
         if (!user.isAccountVerified) {
@@ -135,7 +126,7 @@ export const login = async (request,response)=>{
 
         const isMatch = await bcrypt.compare(password,user.password);
         if(!isMatch){
-            return response.status(400).json({success:false,message:"Invalid Password!"});
+            return response.status(400).json({success:false,message:"Invalid Credentials!"});
         }
 
         const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:'1d'});
