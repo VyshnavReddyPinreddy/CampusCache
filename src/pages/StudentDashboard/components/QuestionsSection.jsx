@@ -17,11 +17,13 @@ const QuestionsSection = () => {
     setLoading(true);
     try {
       const endpoint = viewMode === 'my' 
-        ? `/api/questions/user/${userData?._id}`
-        : '/api/questions';
-      const { data } = await axios.get(`${backendUrl}${endpoint}`);
+        ? `/api/question/user-questions`
+        : '/api/question/all-questions';
+      const { data } = await axios.get(`${backendUrl}${endpoint}`, {
+        data: viewMode === 'my' ? { userId: userData?._id } : undefined
+      });
       if (data.success) {
-        setQuestions(data.questions || []);
+        setQuestions(data.allQuestions || data.userQuestions || []);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to fetch questions');
@@ -41,7 +43,7 @@ const QuestionsSection = () => {
     }
     setLoading(true);
     try {
-      const { data } = await axios.get(`${backendUrl}/api/questions/search?q=${searchQuery}`);
+      const { data } = await axios.get(`${backendUrl}/api/question/search?q=${searchQuery}`);
       if (data.success) {
         setQuestions(data.questions || []);
       }

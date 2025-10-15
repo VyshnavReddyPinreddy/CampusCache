@@ -15,13 +15,15 @@ const LeaderboardSection = () => {
 
   const fetchLeaderboard = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/leaderboard`);
+      const { data } = await axios.get(`${backendUrl}/api/points/fetch-points`);
       if (data.success) {
         setLeaderboard(data.leaderboard || []);
         
         // Find user's rank if not in top 10
         if (userData?._id && !data.leaderboard.find(user => user._id === userData._id)) {
-          const { data: rankData } = await axios.get(`${backendUrl}/api/leaderboard/rank/${userData._id}`);
+          const { data: rankData } = await axios.get(`${backendUrl}/api/points/fetch-user-points`, {
+            data: { userId: userData._id }
+          });
           if (rankData.success) {
             setUserRank(rankData.rank);
           }

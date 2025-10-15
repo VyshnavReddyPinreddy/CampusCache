@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import QuestionsSection from './components/QuestionsSection';
 import AnswersSection from './components/AnswersSection';
 import LeaderboardSection from './components/LeaderboardSection';
+import ReportsSection from './components/ReportsSection';
 import Header from '../../components/Header';
 import { AppContent } from '../../context/AppContext';
 import { useContext } from 'react';
@@ -13,12 +14,13 @@ const StudentDashboard = () => {
   const tabs = [
     { id: 'questions', label: 'Questions' },
     { id: 'answers', label: 'Answers' },
-    { id: 'leaderboard', label: 'Leaderboard' }
+    { id: 'leaderboard', label: 'Leaderboard' },
+    { id: 'reports', label: 'My Reports' }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
-      <Header />
+      {/* <Header /> */}
       <div className="container mx-auto px-4 py-8 mt-16">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome, {userData?.name}</h1>
@@ -47,6 +49,7 @@ const StudentDashboard = () => {
           {activeTab === 'questions' && <QuestionsSection />}
           {activeTab === 'answers' && <AnswersSection />}
           {activeTab === 'leaderboard' && <LeaderboardSection />}
+          {activeTab === 'reports' && <ReportsSection />}
         </div>
       </div>
     </div>

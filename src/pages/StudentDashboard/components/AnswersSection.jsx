@@ -13,7 +13,9 @@ const AnswersSection = () => {
   const fetchAnswers = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${backendUrl}/api/answers/user/${userData?._id}`);
+      const { data } = await axios.get(`${backendUrl}/api/answer/user-answers`, {
+        data: { userId: userData?._id }
+      });
       if (data.success) {
         setAnswers(data.answers || []);
       }
