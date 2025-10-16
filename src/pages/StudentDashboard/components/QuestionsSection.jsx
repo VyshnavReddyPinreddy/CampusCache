@@ -12,6 +12,7 @@ const QuestionsSection = () => {
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState('all'); // 'all' or 'my'
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFiltered, setIsFiltered] = useState(false);
 
   const fetchQuestions = async () => {
     setLoading(true);
@@ -38,6 +39,7 @@ const QuestionsSection = () => {
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
+      setIsFiltered(false);
       fetchQuestions();
       return;
     }
@@ -46,6 +48,7 @@ const QuestionsSection = () => {
       const { data } = await axios.get(`${backendUrl}/api/question/search?q=${searchQuery}`);
       if (data.success) {
         setQuestions(data.questions || []);
+        setIsFiltered(true);
       }
     } catch (error) {
       toast.error('Failed to search questions');
@@ -56,7 +59,7 @@ const QuestionsSection = () => {
 
   const handleDelete = async (questionId) => {
     try {
-      const { data } = await axios.delete(`${backendUrl}/api/questions/${questionId}`);
+      const { data } = await axios.delete(`${backendUrl}/api/question/delete-question/${questionId}`);
       if (data.success) {
         toast.success('Question deleted successfully');
         fetchQuestions();
@@ -68,7 +71,7 @@ const QuestionsSection = () => {
 
   const handleReport = async (questionId, reason) => {
     try {
-      const { data } = await axios.post(`${backendUrl}/api/reports`, {
+      const { data } = await axios.post(`${backendUrl}/api/report`, {
         contentId: questionId,
         contentType: 'Question',
         reason,
@@ -87,7 +90,7 @@ const QuestionsSection = () => {
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-4">
           <button
-            onClick={() => setViewMode('all')}
+            onClick={() => { setViewMode('all'); setSearchQuery(''); setIsFiltered(false); }}
             className={`px-4 py-2 rounded-lg transition-all duration-200 ${
               viewMode === 'all'
                 ? 'bg-indigo-500 text-white'
@@ -97,7 +100,7 @@ const QuestionsSection = () => {
             All Questions
           </button>
           <button
-            onClick={() => setViewMode('my')}
+            onClick={() => { setViewMode('my'); setSearchQuery(''); setIsFiltered(false); }}
             className={`px-4 py-2 rounded-lg transition-all duration-200 ${
               viewMode === 'my'
                 ? 'bg-indigo-500 text-white'
@@ -124,12 +127,21 @@ const QuestionsSection = () => {
             placeholder="Search questions..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500"
           />
-          <button
-            onClick={handleSearch}
-            className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
-          >
-            Search
-          </button>
+          {isFiltered ? (
+            <button
+              onClick={() => { setSearchQuery(''); setIsFiltered(false); fetchQuestions(); }}
+              className="px-4 py-2 bg-red-200 text-red-700 rounded-lg hover:bg-red-300 transition-colors"
+            >
+              Remove Filters
+            </button>
+          ) : (
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+            >
+              Search
+            </button>
+          )}
         </div>
       </div>
 

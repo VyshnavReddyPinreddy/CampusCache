@@ -22,6 +22,8 @@ const questionSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }
+},{
+    timestamps:true
 });
 
 // Add text indexes for better search capabilities

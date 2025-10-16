@@ -201,7 +201,7 @@ const AdminDashboard = () => {
           </div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm font-medium text-gray-600">Reasons:</span>
-            <span className="text-sm text-gray-800">{report.reasons.join(', ')}</span>
+            <span className="text-sm text-gray-800">report.reasons</span>
           </div>
           <p className="text-sm text-gray-700 mt-2">{report.description}</p>
         </div>
