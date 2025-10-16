@@ -15,11 +15,19 @@ export const createReport = async (request, response) => {
             if(!question){
                 return response.status(404).json({ success: false, message: "Question not found." });
             }
+            // check if author is reporting their own content
+            if(question.author.toString()===userId){
+                return response.status(400).json({ success: false, message: "You cannot report your own content." });
+            }
         }else if(contentType==='Answer'){
             const answer = await Answer.findById(contentId);
             if(!answer){
                 return response.status(404).json({ success: false, message: "Answer not found." });
             }   
+            // check if author is reporting their own content
+            if(answer.author.toString()===userId){
+                return response.status(400).json({ success: false, message: "You cannot report your own content." });
+            }
         }else{
             return response.status(400).json({ success: false, message: "Invalid content type." });
         }

@@ -1,90 +1,104 @@
-# CampusCache AI Development Guide
+````markdown
+# CampusCache — Copilot instructions (concise)
 
-This guide provides essential context for AI agents working with the CampusCache codebase.
+This file gives focused, actionable information for AI coding agents working on CampusCache. Use these points to make small, safe edits and to find where to implement features.
 
-## Project Architecture
+## Big-picture architecture
 
-CampusCache is a full-stack web application with:
+- Frontend: React + Vite in `src/` (single-page app). Entry: `src/main.jsx`, top component `src/App.jsx`.
+- Backend: Express app under `server/`. Entry: `server/index.js` (run with `npm run dev` in `server`).
+- Database: MongoDB via Mongoose. Connection in `server/config/database.js`.
 
-- Frontend: React + Vite in `/src` directory
-- Backend: Express.js server in `/server` directory
-- Database: MongoDB (configured in `server/config/database.js`)
+Why this layout: frontend and backend are colocated for local dev; root `npm run dev` (uses `concurrently`) starts both.
 
-### Key Components
+## Key components & where to look (quick links)
 
-1. **Authentication System**
+- Auth: `server/controllers/authController.js` and model `server/models/User.js` (JWT + cookies).
+- Q&A: `server/models/Question.js`, `server/models/Answer.js`, controllers in `server/controllers/Question.js` and `server/controllers/Answer.js`.
+- Voting: `server/models/Votes.js`, `server/controllers/Voting.js`.
+- Reports & admin: `server/models/Report.js`, `server/controllers/reportController.js`, admin routes in `server/routes/adminRoutes.js` and UI in `src/pages/AdminDashboard.jsx`.
+- Email: `server/config/nodemailer.js` and `server/config/emailTemplates.js` (OTP/send flows referenced from `authController.js`).
 
-   - Handled by `server/controllers/authController.js`
-   - JWT-based auth with cookie storage
-   - User model defined in `server/models/User.js`
+## Developer workflows (commands to run)
 
-2. **Core Features**
+- Install deps (root):
 
-   - Q&A system (`Question.js` and `Answer.js` models)
-   - Voting system (`Votes.js` model, `controllers/Voting.js`)
-   - Leaderboard (`controllers/Leaderboard.js`)
-   - Reporting system (`Report.js` model, `controllers/reportController.js`)
-
-3. **Email System**
-   - Nodemailer configuration in `server/config/nodemailer.js`
-   - Email templates in `server/config/emailTemplates.js`
-
-## Development Workflow
-
-### Setup & Running
-
-```bash
-# Install dependencies for both client and server
+```cmd
 npm install
-cd server && npm install
+```
+````
 
-# Start development environment (both client and server)
+- Start both client + server (recommended for local dev):
+
+```cmd
 npm run dev
 ```
 
-### Project Structure Conventions
+This runs Vite for the frontend and `nodemon index.js` for the server via `concurrently`.
 
-- Controllers handle business logic (`server/controllers/`)
-- Routes define API endpoints (`server/routes/`)
-- Models define database schemas (`server/models/`)
-- Middleware for auth in `server/middlewares/userAuth.js`
+- Start only server (from `server/`):
 
-### Key Integration Points
+```cmd
+cd server
+npm run dev
+```
 
-1. API Communication: Frontend uses Axios for API calls
-2. Database: MongoDB connection configured via MONGODB_URL env variable
-3. Authentication: JWT tokens stored in cookies
+- Build frontend for production:
 
-## Common Tasks
+```cmd
+npm run build
+```
 
-### Adding New Features
+## Environment variables (discoverable list)
 
-1. Backend: Add model → controller → route
-2. Frontend: Add component → update state → integrate API
+- `MONGODB_URL` / `DATABASE_URL` — MongoDB connection (see `server/config/database.js`).
+- `JWT_SECRET` — used by `authController.js`.
+- `SENDER_EMAIL`, `SENDER_PASSWORD` — used by `server/config/nodemailer.js` for sending OTPs.
 
-### Configuration
+Set these in `server/.env` when running the server.
 
-- Environment variables required:
-  - MONGODB_URL
-  - JWT_SECRET
-  - EMAIL\_\* (for nodemailer)
+## Project-specific conventions and patterns
 
-## Project-Specific Patterns
+- API responses follow shape: { success: boolean, data?: any, error?: string } — mirror this when adding endpoints (`server/controllers/*`).
+- Controllers implement business logic; routes only wire endpoints to controller functions (see `server/routes/*`).
+- Middleware: authentication middleware lives in `server/middlewares/` (look at `userAuth.js` and `adminAuth.js`).
+- Frontend state: local hooks + small Context API in `src/context/AppContext.jsx` for auth/global user state.
+- Frontend styling uses Tailwind; look at `index.css` and `vite` + Tailwind config in root files.
 
-1. **Error Handling**
+## Integration & cross-component notes
 
-   - Backend uses express middleware for error handling
-   - Frontend errors handled through toast notifications
+- Frontend calls backend APIs with Axios. Base URLs are used inline in components; check `src/components` and `src/pages` for examples.
+- JWT tokens are stored in cookies (set by server). When adding protected routes, ensure `cookie` is read on server-side routes (see `userAuth.js`).
+- Email flows: OTP generation occurs in `authController.js` and emails are sent via `nodemailer.js` templates. Avoid changing template keys without updating `emailTemplates.js`.
 
-2. **State Management**
+## Safe edit checklist (before PR)
 
-   - React hooks for local state
-   - Context API for global state
+1. Follow the response shape `{ success, data, error }` in new endpoints.
+2. Update corresponding route in `server/routes/` and add tests or a brief manual verification note.
+3. When changing auth or token behavior, update `server/middlewares/*` and search for cookie usage in `src/`.
+4. Preserve existing environment variable names; add new ones to README and `.env.example` (if created).
 
-3. **API Structure**
-   - RESTful endpoints in `server/routes/`
-   - Consistent response format: `{ success: boolean, data?: any, error?: string }`
+## Examples (copy-paste patterns to reuse)
+
+- Return format in controllers:
+
+```js
+return res.json({ success: true, data: result });
+// on error:
+// return res.status(400).json({ success: false, error: 'reason' });
+```
+
+- Start both dev servers (root): `npm run dev` — uses `concurrently` and runs `vite` and `server` script.
+
+## Files to open first when investigating a task
+
+- `server/index.js`, `server/controllers/authController.js`, `server/config/database.js`
+- `src/main.jsx`, `src/App.jsx`, `src/context/AppContext.jsx`
 
 ---
 
-Note: This documentation reflects currently implemented patterns and should be updated as the codebase evolves.
+If anything here is unclear or you'd like more specifics (examples for adding a new endpoint, wiring OAuth, or a migration plan), tell me which area to expand and I'll update this file.
+
+```
+   - Context API for global state
+```

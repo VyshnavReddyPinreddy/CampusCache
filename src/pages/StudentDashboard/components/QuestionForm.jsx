@@ -20,7 +20,7 @@ const QuestionForm = ({ onClose, onSuccess }) => {
         .map(tag => tag.trim())
         .filter(tag => tag);
 
-      const { data } = await axios.post(`${backendUrl}/api/questions`, {
+      const { data } = await axios.post(`${backendUrl}/api/question/add`, {
         userId: userData._id,
         title: formData.title,
         content: formData.content,
