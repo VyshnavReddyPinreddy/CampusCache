@@ -20,9 +20,7 @@ const QuestionsSection = () => {
       const endpoint = viewMode === 'my' 
         ? `/api/question/user-questions`
         : '/api/question/all-questions';
-      const { data } = await axios.get(`${backendUrl}${endpoint}`, {
-        data: viewMode === 'my' ? { userId: userData?._id } : undefined
-      });
+      const { data } = await axios.get(`${backendUrl}${endpoint}`);
       if (data.success) {
         setQuestions(data.allQuestions || data.userQuestions || []);
       }

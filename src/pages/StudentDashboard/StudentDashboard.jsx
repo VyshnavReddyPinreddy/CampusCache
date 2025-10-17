@@ -3,11 +3,25 @@ import QuestionsSection from './components/QuestionsSection';
 import { AppContent } from '../../context/AppContext';
 import { useContext, useState } from 'react';
 import LeaderboardSection from './components/LeaderboardSection';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const StudentDashboard = () => {
-  const { userData } = useContext(AppContent);
+  const { userData, backendUrl } = useContext(AppContent);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
+  const handleLogout = async () => {
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/auth/logout`);
+      if(data.success){
+        toast.success("Logged out successfully!");
+        // Redirect to login page or homepage
+        window.location.href = '/';
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Logout failed!");
+    }
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
       <div className="container mx-auto px-4 py-8">
@@ -25,7 +39,7 @@ const StudentDashboard = () => {
                 <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-indigo-50">
                   Leaderboard
                 </a>
-                <a href="/logout" className="block px-4 py-2 text-gray-800 hover:bg-indigo-50">
+                <a onClick={()=>handleLogout()} className="block px-4 py-2 text-gray-800 hover:bg-indigo-50">
                   Logout
                 </a>
               </div>

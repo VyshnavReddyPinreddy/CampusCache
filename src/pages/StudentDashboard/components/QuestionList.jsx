@@ -5,14 +5,18 @@ import axios from 'axios';
 import { AppContent } from '../../../context/AppContext';
 
 const QuestionList = ({ questions, loading, onDelete, onReport, isUserQuestion }) => {
-  const { backendUrl } = useContext(AppContent);
+  const { backendUrl, userData } = useContext(AppContent);
   const [reportingQuestion, setReportingQuestion] = useState(null);
+  const [reportingAnswer, setReportingAnswer] = useState(null);
   const [reportReason, setReportReason] = useState('');
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loadingAnswers, setLoadingAnswers] = useState({});
   const [answeringQuestion, setAnsweringQuestion] = useState(null);
   const [answerContent, setAnswerContent] = useState('');
+  const [isAnswerAnonymous, setIsAnswerAnonymous] = useState(false);
+  const [votes, setVotes] = useState({});
+  const [votingInProgress, setVotingInProgress] = useState({});
 
   const handleReport = (questionId) => {
     // Require at least one word character to avoid empty/whitespace-only reasons
@@ -26,6 +30,89 @@ const QuestionList = ({ questions, loading, onDelete, onReport, isUserQuestion }
     setReportReason('');
   };
 
+  const handleReportAnswer = async (answerId) => {
+    if (!/\w+/.test(reportReason)) {
+      toast.error('Provide at least one word for reason to report');
+      return;
+    }
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/report`, {
+        contentId: answerId,
+        contentType: 'Answer',
+        reasons: reportReason.trim()
+      });
+      if (data.success) {
+        toast.success('Answer reported successfully');
+        setReportingAnswer(null);
+        setReportReason('');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to report answer');
+    }
+  };
+
+  const handleVote = async (answerId, voteType) => {
+    if (votingInProgress[answerId]) return;
+    
+    try {
+      setVotingInProgress(prev => ({ ...prev, [answerId]: true }));
+      const { data } = await axios.post(`${backendUrl}/api/vote/add-vote`, {
+        userId: userData._id,
+        answerId,
+        voteType
+      });
+      
+      if (data.success) {
+        setVotes(prev => ({
+          ...prev,
+          [answerId]: data.voteStatus
+        }));
+        // Update the answer score in the answers state
+        setAnswers(prev => {
+          const questionId = selectedQuestion;
+          if (!questionId) return prev;
+          
+          const updatedAnswers = prev[questionId].map(answer => 
+            answer._id === answerId ? { ...answer, score: data.answer.score } : answer
+          );
+          
+          return {
+            ...prev,
+            [questionId]: updatedAnswers
+          };
+        });
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to vote');
+    } finally {
+      setVotingInProgress(prev => ({ ...prev, [answerId]: false }));
+    }
+  };
+
+  const handleDeleteAnswer = async (answerId) => {
+    try {
+      const { data } = await axios.delete(`${backendUrl}/api/answer/delete-answer`, {
+        data: {
+          userId: userData._id,
+          answerId
+        }
+      });
+      if (data.success) {
+        toast.success('Answer deleted successfully');
+        // Refresh the answers for this question
+        const questionId = selectedQuestion;
+        if (questionId) {
+          const { data: newData } = await axios.get(`${backendUrl}/api/answer/get-answer/${questionId}`);
+          if (newData.success) {
+            setAnswers(prev => ({ ...prev, [questionId]: newData.allAnswers || [] }));
+          }
+        }
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete answer');
+    }
+  };
+
   const handleAnswer = async (questionId) => {
     if (!answerContent.trim()) {
       toast.error('Please provide an answer');
@@ -33,9 +120,11 @@ const QuestionList = ({ questions, loading, onDelete, onReport, isUserQuestion }
     }
 
     try {
-      const { data } = await axios.post(`${backendUrl}/api/answer/create`, {
+      const { data } = await axios.post(`${backendUrl}/api/answer/add-answer`, {
         questionId,
-        content: answerContent.trim()
+        content: answerContent.trim(),
+        isAnonymous: isAnswerAnonymous,
+        userId: userData._id
       });
 
       if (data.success) {
@@ -44,14 +133,33 @@ const QuestionList = ({ questions, loading, onDelete, onReport, isUserQuestion }
         setAnsweringQuestion(null);
         // Update the answers list if answers are currently shown
         if (selectedQuestion === questionId) {
-          const { data: newData } = await axios.get(`${backendUrl}/api/answer/question/${questionId}`);
+          const { data: newData } = await axios.get(`${backendUrl}/api/answer/get-answer/${questionId}`);
           if (newData.success) {
-            setAnswers(prev => ({ ...prev, [questionId]: newData.answers || [] }));
+            setAnswers(prev => ({ ...prev, [questionId]: newData.allAnswers || [] }));
           }
         }
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to post answer');
+    }
+  };
+
+  const fetchVotes = async (answerId) => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/vote/user-vote`, {
+        params: {
+          userId: userData._id,
+          answerId
+        }
+      });
+      if (data.success && data.vote) {
+        setVotes(prev => ({
+          ...prev,
+          [answerId]: data.vote.voteType
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch vote status:', error);
     }
   };
 
@@ -63,10 +171,16 @@ const QuestionList = ({ questions, loading, onDelete, onReport, isUserQuestion }
 
     setLoadingAnswers(prev => ({ ...prev, [questionId]: true }));
     try {
-      const { data } = await axios.get(`${backendUrl}/api/answer/question/${questionId}`);
+      const { data } = await axios.get(`${backendUrl}/api/answer/get-answer/${questionId}`);
       if (data.success) {
-        setAnswers(prev => ({ ...prev, [questionId]: data.answers || [] }));
+        const allAnswers = data.allAnswers || [];
+        setAnswers(prev => ({ ...prev, [questionId]: allAnswers }));
         setSelectedQuestion(questionId);
+        
+        // Fetch vote status for each answer
+        allAnswers.forEach(answer => {
+          fetchVotes(answer._id);
+        });
       }
     } catch (error) {
       toast.error('Failed to fetch answers');
@@ -181,22 +295,37 @@ const QuestionList = ({ questions, loading, onDelete, onReport, isUserQuestion }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500"
                 rows="3"
               />
-              <div className="flex justify-end gap-2 mt-2">
-                <button
-                  onClick={() => {
-                    setAnsweringQuestion(null);
-                    setAnswerContent('');
-                  }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleAnswer(question._id)}
-                  className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
-                >
-                  Post Answer
-                </button>
+              <div className="flex justify-between items-center mt-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id={`anonymous-${question._id}`}
+                    checked={isAnswerAnonymous}
+                    onChange={(e) => setIsAnswerAnonymous(e.target.checked)}
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <label htmlFor={`anonymous-${question._id}`} className="text-sm text-gray-600">
+                    Post anonymously
+                  </label>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setAnsweringQuestion(null);
+                      setAnswerContent('');
+                      setIsAnswerAnonymous(false);
+                    }}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleAnswer(question._id)}
+                    className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+                  >
+                    Post Answer
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -208,16 +337,138 @@ const QuestionList = ({ questions, loading, onDelete, onReport, isUserQuestion }
                 <p className="text-gray-500">No answers yet. Be the first to answer!</p>
               ) : (
                 answers[question._id].map((answer) => (
-                  <div key={answer._id} className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-700 mb-2">{answer.content}</p>
-                    <div className="flex justify-between items-center text-sm text-gray-500">
-                      <div>
-                        Posted by: {answer.isAnonymous ? '-----' : answer.author?.name || 'Unknown'}
-                      </div>
-                      <div>
-                        {format(new Date(answer.createdAt), 'MMM d, yyyy')}
+                  <div key={answer._id} className="bg-gray-50 rounded-lg overflow-hidden">
+                    <div className="p-4">
+                      <p className="text-gray-700 whitespace-pre-wrap break-words">{answer.content}</p>
+                    </div>
+
+                    <div className="bg-gray-100 px-4 py-3 border-t border-gray-200">
+                      <div className="flex items-center justify-between">
+                        {/* Left side: Voting controls */}
+                        <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-md shadow-sm">
+                          <button
+                            onClick={() => handleVote(answer._id, 1)}
+                            disabled={votingInProgress[answer._id]}
+                            className={`group flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200 ${
+                              votes[answer._id] === 1
+                                ? 'bg-indigo-100'
+                                : 'hover:bg-indigo-50'
+                            } ${
+                              votingInProgress[answer._id] ? 'cursor-not-allowed opacity-50' : ''
+                            }`}
+                          >
+                            <svg 
+                              className={`w-5 h-5 transition-all duration-200 ${
+                                votes[answer._id] === 1
+                                  ? 'text-indigo-600 scale-110'
+                                  : 'text-gray-500 group-hover:text-indigo-600 group-hover:scale-110'
+                              }`} 
+                              fill="none" 
+                              strokeWidth="2.5"
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M12 19V5M5 12l7-7 7 7"/>
+                            </svg>
+                          </button>
+                          
+                          <span className={`font-semibold text-lg transition-all duration-200 ${
+                            answer.score > 0 ? 'text-indigo-600' : 
+                            answer.score < 0 ? 'text-red-600' : 
+                            'text-gray-600'
+                          }`}>
+                            {answer.score || 0}
+                          </span>
+
+                          <button
+                            onClick={() => handleVote(answer._id, -1)}
+                            disabled={votingInProgress[answer._id]}
+                            className={`group flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200 ${
+                              votes[answer._id] === -1
+                                ? 'bg-red-100'
+                                : 'hover:bg-red-50'
+                            } ${
+                              votingInProgress[answer._id] ? 'cursor-not-allowed opacity-50' : ''
+                            }`}
+                          >
+                            <svg 
+                              className={`w-5 h-5 transition-all duration-200 ${
+                                votes[answer._id] === -1
+                                  ? 'text-red-600 scale-110'
+                                  : 'text-gray-500 group-hover:text-red-600 group-hover:scale-110'
+                              }`} 
+                              fill="none" 
+                              strokeWidth="2.5"
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M12 5v14M5 12l7 7 7-7"/>
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Center: Posted by and date */}
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <div>
+                            Posted by: {answer.isAnonymous ? '-----' : answer.author?.name || 'Unknown'}
+                          </div>
+                          <div>
+                            {format(new Date(answer.createdAt), 'MMM d, yyyy')}
+                          </div>
+                        </div>
+
+                        {/* Right side: Action buttons */}
+                        <div className="flex items-center gap-2">
+                          {answer.author?._id === userData?._id ? (
+                            <button
+                              onClick={() => handleDeleteAnswer(answer._id)}
+                              className="px-3 py-1.5 rounded-lg transition-all duration-200 bg-red-100 text-red-600 hover:bg-red-600 hover:text-white"
+                            >
+                              Delete
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setReportingAnswer(answer._id)}
+                              className={`px-3 py-1.5 rounded-lg transition-all duration-200 ${
+                                reportingAnswer === answer._id
+                                ? 'bg-red-600 text-white hover:bg-red-700'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100'
+                              }`}
+                            >
+                              Report
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
+                    {reportingAnswer === answer._id && (
+                      <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+                        <textarea
+                          value={reportReason}
+                          onChange={(e) => setReportReason(e.target.value)}
+                          placeholder="Why are you reporting this answer?"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500"
+                          rows="3"
+                        />
+                        <div className="flex justify-end gap-2 mt-2">
+                          <button
+                            onClick={() => {
+                              setReportingAnswer(null);
+                              setReportReason('');
+                            }}
+                            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleReportAnswer(answer._id)}
+                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                          >
+                            Submit Report
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))
               )}

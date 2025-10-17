@@ -58,7 +58,7 @@ export const postAnswer = async(req,res)=>{
 
 //fetch answers
 export const fetchAnswers = async(req,res)=>{
-    const {questionId} =req.body;
+    const {questionId} =req.params;
     if(!questionId){
          return res.status(400).json({
             success:false,
@@ -67,7 +67,9 @@ export const fetchAnswers = async(req,res)=>{
     }
 
     try{
-        const allAnswers = await Answer.find({question:questionId}).sort({score: -1});
+        const allAnswers = await Answer.find({question:questionId})
+            .populate('author', 'name')
+            .sort({score: -1});
         return res.status(200).json({
             success:true,
             message:"Successfully fetched all answers",
