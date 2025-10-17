@@ -4,15 +4,24 @@ import userModel from '../models/User.js';
 import transporter from '../config/nodemailer.js';
 import { EMAIL_VERIFY_TEMPLATE,PASSWORD_RESET_TEMPLATE } from '../config/emailTemplates.js';
 
+
 export const register = async (request,response)=>{
     const {name,email,password} = request.body;
     if(!name || !email || !password){
         return response.status(400).json({success:false,message:"Missing Details"});
     }
+    // email should ends with @student.nitw.ac.in
+    if(!email.endsWith('@student.nitw.ac.in')){
+        return response.status(400).json({success:false,message:"Use Institute Email only !"});
+    }
+    // check whether password follows the criteria of at least 8 characters
+    if(password.length < 8){
+        return response.status(400).json({success:false,message:"Password must be at least 8 characters long."});
+    }
     try{
         const existingUser = await userModel.findOne({email});
         if(existingUser && existingUser.isAccountVerified){
-             return response.status(400).json({success:false,message:"User already exists"});
+            return response.status(400).json({success:false,message:"User already exists"});
         }
 
         // If user exists but is not verified, delete them to start fresh
@@ -106,6 +115,10 @@ export const login = async (request,response)=>{
         if(!user){
             return response.status(404).json({success:false,message:"Invalid Email!"});
         }
+            
+        // if(!email.endsWith('@student.nitw.ac.in') && user.role==='Student'){
+        //     return response.status(400).json({success:false,message:"Use Institute Email only !"});
+        // }
 
         if (!user.isAccountVerified) {
             return response.status(403).json({ success: false, message: "Account not verified. Please check your email." });
@@ -113,7 +126,7 @@ export const login = async (request,response)=>{
 
         const isMatch = await bcrypt.compare(password,user.password);
         if(!isMatch){
-            return response.status(400).json({success:false,message:"Invalid Password!"});
+            return response.status(400).json({success:false,message:"Invalid Credentials!"});
         }
 
         const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:'1d'});

@@ -1,7 +1,7 @@
 import Question from "../models/Question.js";
 import Answer from "../models/Answer.js";
 import User from "../models/User.js";
-import Vote from "../models/Votes.js"
+import Vote from "../models/Votes.js";
 
 //post question
 export const addQuestion = async (req,res)=>{
@@ -62,30 +62,29 @@ export const addQuestion = async (req,res)=>{
 //Search questions
 export const searchQuestions = async (req, res) => {
     try {
-        const { query } = req.query;
-        
-        if (!query) {
+        const { q } = req.query; // frontend sends ?q=term
+
+        if (!q || !q.trim()) {
             return res.status(400).json({
                 success: false,
                 message: "Search query is required"
             });
         }
 
-        // Prepare search terms
-        const searchTerms = query.trim().split(/\s+/);
-        
-        // Create a combined search query
+        const searchRegex = new RegExp(q.trim(), 'i');
 
-        // Find questions with both text and regex search
-        const questions = await Question.find(
-                        { $text: { $search: query } },
-                        { score: { $meta: "textScore" } }
-                        )
-                        .populate('author', 'username email points -_id')
-                        .select('title content tags updatedAt isAnonymous')
-                        .sort({ score: { $meta: "textScore" } })
-                        .limit(20);
-
+        // Find questions matching title, content or tags
+        const questions = await Question.find({
+            $or: [
+                { title: { $regex: searchRegex } },
+                { content: { $regex: searchRegex } },
+                { tags: { $in: [searchRegex] } }
+            ]
+        })
+        .populate('author', 'name email points')
+        .select('title content tags createdAt isAnonymous author')
+        .sort({ createdAt: -1 })
+        .limit(20);
 
         return res.status(200).json({
             success: true,
@@ -107,12 +106,35 @@ export const searchQuestions = async (req, res) => {
 //fetchAllquestions
 export const fetchAllQuestions = async(req,res)=>{
     try{
-        const allQuestions = await Question.find();
+        const allQuestions = await Question.find()
+            .populate({
+                path: 'author',
+                select: 'name email',
+                transform: doc => {
+                    // If question is anonymous, only return "Anonymous" as name
+                    if (doc && doc._doc.isAnonymous) {
+                        return { name: 'Anonymous' };
+                    }
+                    return doc;
+                }
+            });
+
+        // Transform the response to handle anonymous posts
+        const formattedQuestions = allQuestions.map(question => {
+            if (question.isAnonymous) {
+                // If anonymous, don't expose author details
+                return {
+                    ...question._doc,
+                    author: { name: 'Anonymous' }
+                };
+            }
+            return question;
+        });
 
         return res.status(200).json({
-            success:true,
-            message:"successfully fetched all questions",
-            allQuestions
+            success: true,
+            message: "successfully fetched all questions",
+            allQuestions: formattedQuestions
         })
     }catch(error){
         return res.status(500).json({
@@ -152,7 +174,8 @@ export const fetchUserQuestions=async(req,res)=>{
 
 //delete question
 export const deleteQuestion =async(req,res)=>{
-    const { userId,questionId,}=req.body;
+    const { userId}=req.body;
+    const {questionId} = req.params;
     if(!userId||!questionId){
         return res.status(400).json({
             success:false,

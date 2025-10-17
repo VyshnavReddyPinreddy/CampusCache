@@ -4,9 +4,10 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import EmailVerify from './pages/EmailVerify'
 import ResetPassword from './pages/ResetPassword'
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from './pages/AdminDashboard.jsx';
+import StudentDashboard from './pages/StudentDashboard/StudentDashboard.jsx'
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
         <Route path='/email-verify' element={<EmailVerify/>}/>
         <Route path='/reset-password' element={<ResetPassword/>}/>
         <Route path='/admin' element={<AdminDashboard/>}/>
+        <Route path='/student' element={<StudentDashboard/>}/>
       </Routes>
     </div>
   )
