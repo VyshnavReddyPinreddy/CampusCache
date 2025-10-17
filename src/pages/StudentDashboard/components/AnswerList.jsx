@@ -7,11 +7,13 @@ const AnswerList = ({ answers, loading, onDelete, onReport, isUserAnswer }) => {
   const [reportReason, setReportReason] = useState('');
 
   const handleReport = (answerId) => {
-    if (!reportReason.trim()) {
-      toast.error('Please provide a reason for reporting');
+    // Require at least one word character to avoid empty/whitespace-only reasons
+    if (!/\w+/.test(reportReason)) {
+      toast.error('Provide at least one word for reason to report');
       return;
     }
-    onReport(answerId, reportReason);
+    const reason = reportReason.trim();
+    onReport(answerId, reason);
     setReportingAnswer(null);
     setReportReason('');
   };
@@ -65,7 +67,7 @@ const AnswerList = ({ answers, loading, onDelete, onReport, isUserAnswer }) => {
 
           <div className="flex justify-between items-center text-sm text-gray-500">
             <div>
-              Posted by: {answer.isAnonymous ? 'Anonymous' : answer.author?.name || 'Unknown'}
+              Posted by: {answer.isAnonymous ? '-----' : answer.author?.name || 'Unknown'}
             </div>
             <div>
               {format(new Date(answer.createdAt), 'MMM d, yyyy')}

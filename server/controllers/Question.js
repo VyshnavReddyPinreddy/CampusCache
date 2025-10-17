@@ -146,7 +146,7 @@ export const fetchAllQuestions = async(req,res)=>{
 
 //fetch user questions
 export const fetchUserQuestions=async(req,res)=>{
-    const userId=req.body.userId;
+    const {userId}=req.body;
 
     if(!userId){
         return res.status(400).json({
@@ -155,12 +155,35 @@ export const fetchUserQuestions=async(req,res)=>{
         });
     }
     try{
-        const userQuestions = await Question.find({author:userId});
+        const userQuestions = await Question.find({author:userId})
+            .populate({
+                path: 'author',
+                select: 'name email',
+                transform: doc => {
+                    // If question is anonymous, only return "Anonymous" as name
+                    if (doc && doc._doc.isAnonymous) {
+                        return { name: 'Anonymous' };
+                    }
+                    return doc;
+                }
+            });
+
+        // Transform the response to handle anonymous posts
+        const formattedQuestions = userQuestions.map(question => {
+            if (question.isAnonymous) {
+                // If anonymous, don't expose author details
+                return {
+                    ...question._doc,
+                    author: { name: '-----' }
+                };
+            }
+            return question;
+        });
 
         return res.status(200).json({
             success:true,
             message:"Successfully fetched questions",
-            userQuestions
+            userQuestions: formattedQuestions
         });
     }catch(error){
         return res.status(500).json({

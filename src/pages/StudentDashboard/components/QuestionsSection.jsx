@@ -20,9 +20,7 @@ const QuestionsSection = () => {
       const endpoint = viewMode === 'my' 
         ? `/api/question/user-questions`
         : '/api/question/all-questions';
-      const { data } = await axios.get(`${backendUrl}${endpoint}`, {
-        data: viewMode === 'my' ? { userId: userData?._id } : undefined
-      });
+      const { data } = await axios.get(`${backendUrl}${endpoint}`);
       if (data.success) {
         setQuestions(data.allQuestions || data.userQuestions || []);
       }
@@ -74,8 +72,7 @@ const QuestionsSection = () => {
       const { data } = await axios.post(`${backendUrl}/api/report`, {
         contentId: questionId,
         contentType: 'Question',
-        reason,
-        description: reason
+        reasons: reason
       });
       if (data.success) {
         toast.success('Question reported successfully');
@@ -160,7 +157,7 @@ const QuestionsSection = () => {
         loading={loading}
         onDelete={handleDelete}
         onReport={handleReport}
-        isUserQuestion={(question) => question.author === userData?._id}
+        isUserQuestion={(question) => question.author?._id === userData?._id || question.author === userData?._id}
       />
     </div>
   );

@@ -3,54 +3,79 @@ import Answer from "../models/Answer.js"
 
 
 //add new vote
-export const addVote= async (req,res)=>{
+export const addVote = async (req,res)=>{
+    const userId = req.body.userId;
+    const {answerId, voteType} = req.body;
 
-    const userId=req.body.userId
-
-    const {answerId,voteDirection}=req.body
-
-    if(!answerId||!userId||!voteDirection){
+    if(!answerId || !userId || !voteType){
         return res.status(406).json({
             success:false,
-            message:"not provided required fields"
-        })
+            message:"Please provide all required fields"
+        });
     }
-    try{
-        const userVote= await Vote.find({voter:userId,answerId})
+
+    try {
+        // Check if user has already voted
+        const existingVote = await Vote.findOne({voter: userId, answerId});
         
-        if(userVote){
-            return res.status(400).json({
-                success:false,
-                message:"vote already exists",
-                userVote
-            })
+        if(existingVote) {
+            if(existingVote.voteType === voteType) {
+                // If voting the same way, remove the vote
+                await Vote.findOneAndDelete({voter: userId, answerId});
+                const updatedAnswer = await Answer.findByIdAndUpdate(
+                    answerId,
+                    {$inc: {score: -voteType}},
+                    {new: true}
+                );
+                return res.status(200).json({
+                    success: true,
+                    message: "Vote removed successfully",
+                    answer: updatedAnswer,
+                    voteStatus: null
+                });
+            } else {
+                // If changing vote direction, update the vote
+                existingVote.voteType = voteType;
+                await existingVote.save();
+                const updatedAnswer = await Answer.findByIdAndUpdate(
+                    answerId,
+                    {$inc: {score: voteType * 2}}, // Multiply by 2 because we're changing from -1 to 1 or vice versa
+                    {new: true}
+                );
+                return res.status(200).json({
+                    success: true,
+                    message: "Vote updated successfully",
+                    answer: updatedAnswer,
+                    voteStatus: voteType
+                });
+            }
         }
 
-        const newVote= new Vote({
-            voter:userId,
+        // If no existing vote, create new vote
+        const newVote = new Vote({
+            voter: userId,
             answerId,
-            contentType:"Answer",
-            voteType:voteDirection
-        })
+            voteType
+        });
 
-        const savedVote=await newVote.save();
-
-         const updatedAnswerVoteCount=await Answer.findByIdAndUpdate(answerId,
-                    {$inc:{score:voteDirection}},
-                    {new:true}
-                )
+        await newVote.save();
+        const updatedAnswer = await Answer.findByIdAndUpdate(
+            answerId,
+            {$inc: {score: voteType}},
+            {new: true}
+        );
 
         return res.status(200).json({
-            success:true,
-            message:"successfully added new vote",
-            savedVote,
-            updatedAnswerVoteCount
-        })
-    }catch(error){
-        return res.status(406).json({
-            success:false,
-            message:error.message
-        })
+            success: true,
+            message: "Vote added successfully",
+            answer: updatedAnswer,
+            voteStatus: voteType
+        });
+    } catch(error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 }
 
