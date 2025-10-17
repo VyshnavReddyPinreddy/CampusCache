@@ -8,7 +8,22 @@ import { toast } from 'react-toastify';
 
 const StudentDashboard = () => {
   const { userData, backendUrl } = useContext(AppContent);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      const profileMenu = document.getElementById('profile-menu');
+      const profileButton = document.getElementById('profile-button');
+      if (showDropdown && profileMenu && !profileMenu.contains(event.target) && !profileButton.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showDropdown]);
 
   const handleLogout = async () => {
     try {
@@ -29,19 +44,36 @@ const StudentDashboard = () => {
           <h1 className="text-2xl font-bold text-gray-800">Welcome, {userData?.name}</h1>
           <div className="relative">
             <button 
-              onClick={() => setShowLeaderboard(!showLeaderboard)}
+              id="profile-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDropdown(!showDropdown);
+              }}
               className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-semibold hover:bg-indigo-700 transition-colors"
             >
               {userData?.name?.[0]?.toUpperCase()}
             </button>
-            {showLeaderboard && (
-              <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-xl z-20">
-                <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-indigo-50">
+            {showDropdown && (
+              <div id="profile-menu" className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-xl z-20">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLeaderboard(true);
+                    setShowDropdown(false);
+                  }} 
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-indigo-50"
+                >
                   Leaderboard
-                </a>
-                <a onClick={()=>handleLogout()} className="block px-4 py-2 text-gray-800 hover:bg-indigo-50">
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLogout();
+                  }} 
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-indigo-50"
+                >
                   Logout
-                </a>
+                </button>
               </div>
             )}
           </div>
@@ -49,7 +81,11 @@ const StudentDashboard = () => {
 
         {/* Content Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <QuestionsSection />
+          {showLeaderboard ? (
+            <LeaderboardSection onClose={() => setShowLeaderboard(false)} />
+          ) : (
+            <QuestionsSection />
+          )}
         </div>
       </div>
     </div>

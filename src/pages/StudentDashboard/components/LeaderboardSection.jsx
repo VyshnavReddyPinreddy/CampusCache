@@ -3,38 +3,28 @@ import { AppContent } from '../../../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const LeaderboardSection = () => {
+const LeaderboardSection = ({ onClose }) => {
   const { backendUrl, userData } = useContext(AppContent);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [userRank, setUserRank] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLeaderboard();
-  }, []);
-
-  const fetchLeaderboard = async () => {
-    try {
-      const { data } = await axios.get(`${backendUrl}/api/points/fetch-points`);
-      if (data.success) {
-        setLeaderboard(data.leaderboard || []);
-        
-        // Find user's rank if not in top 10
-        if (userData?._id && !data.leaderboard.find(user => user._id === userData._id)) {
-          const { data: rankData } = await axios.get(`${backendUrl}/api/points/fetch-user-points`, {
-            data: { userId: userData._id }
-          });
-          if (rankData.success) {
-            setUserRank(rankData.rank);
-          }
+    const fetchLeaderboard = async () => {
+      try {
+        const { data: response } = await axios.get(`${backendUrl}/api/points/fetch-points`);
+        if (response.success) {
+          setLeaderboard(response.data || []);
         }
+      // eslint-disable-next-line no-unused-vars
+      } catch (error) {
+        toast.error('Failed to fetch leaderboard');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      toast.error('Failed to fetch leaderboard');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchLeaderboard();
+  }, [backendUrl, userData]);
 
   if (loading) {
     return (
@@ -47,7 +37,17 @@ const LeaderboardSection = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Leaderboard</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Leaderboard</h2>
+        <button
+          onClick={onClose}
+          className="text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
       
       <div className="overflow-hidden rounded-lg border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200">
@@ -72,7 +72,7 @@ const LeaderboardSection = () => {
               >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    {index + 1}
+                    {user.rank}
                     {index < 3 && (
                       <span className="ml-2">
                         {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
@@ -93,15 +93,6 @@ const LeaderboardSection = () => {
           </tbody>
         </table>
       </div>
-
-      {userRank && userRank > 10 && (
-        <div className="mt-6 p-4 bg-indigo-50 rounded-lg">
-          <h3 className="font-medium text-gray-900">Your Position</h3>
-          <p className="text-gray-600">
-            You are currently ranked #{userRank} with {userData?.points} points
-          </p>
-        </div>
-      )}
     </div>
   );
 };
