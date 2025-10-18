@@ -124,19 +124,18 @@ const QuestionsSection = () => {
             placeholder="Search questions..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500"
           />
-          {isFiltered ? (
-            <button
-              onClick={() => { setSearchQuery(''); setIsFiltered(false); fetchQuestions(); }}
-              className="px-4 py-2 bg-red-200 text-red-700 rounded-lg hover:bg-red-300 transition-colors"
-            >
-              Remove Filters
-            </button>
-          ) : (
-            <button
+          <button
               onClick={handleSearch}
               className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
             >
               Search
+            </button>
+          {isFiltered && (
+            <button
+              onClick={() => { setSearchQuery(''); setIsFiltered(false); fetchQuestions(); }}
+              className="px-4 py-2 bg-red-200 text-red-700 rounded-lg hover:bg-red-300 transition-colors"
+            >
+              Clear Filter
             </button>
           )}
         </div>

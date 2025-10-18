@@ -68,7 +68,7 @@ const LeaderboardSection = ({ onClose }) => {
             {leaderboard.map((user, index) => (
               <tr 
                 key={user._id}
-                className={user.name === userData?.name ? 'bg-indigo-50' : ''}
+                className={user.name === userData?.name ? 'bg-indigo-300' : ''}
               >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">

@@ -71,26 +71,49 @@ export const searchQuestions = async (req, res) => {
             });
         }
 
-        const searchRegex = new RegExp(q.trim(), 'i');
+        // Split search query into words and remove duplicates
+        const searchWords = [...new Set(q.trim().toLowerCase().split(/\s+/))];
+        
+        // Get all questions first
+        const allQuestions = await Question.find({})
+            .populate('author', 'name email points')
+            .select('title content tags createdAt isAnonymous author');
 
-        // Find questions matching title, content or tags
-        const questions = await Question.find({
-            $or: [
-                { title: { $regex: searchRegex } },
-                { content: { $regex: searchRegex } },
-                { tags: { $in: [searchRegex] } }
-            ]
-        })
-        .populate('author', 'name email points')
-        .select('title content tags createdAt isAnonymous author')
-        .sort({ createdAt: -1 })
-        .limit(20);
+        // Calculate relevance score for each question
+        const scoredQuestions = allQuestions.map(question => {
+            let score = 0;
+            const titleWords = question.title.toLowerCase().split(/\s+/);
+            const contentWords = question.content.toLowerCase().split(/\s+/);
+            const tagWords = question.tags.map(tag => tag.toLowerCase());
+            
+            // Calculate matches in title (highest weight)
+            searchWords.forEach(word => {
+                if (titleWords.some(tw => tw.includes(word))) score += 3;
+                if (contentWords.some(cw => cw.includes(word))) score += 1;
+                if (tagWords.some(tag => tag.includes(word))) score += 2;
+            });
+
+            // Calculate percentage match (normalized to 100)
+            const maxPossibleScore = searchWords.length * 3; // maximum score if all words match in title
+            const matchPercentage = (score / maxPossibleScore) * 100;
+
+            return {
+                ...question.toObject(),
+                matchPercentage: Math.min(100, matchPercentage)
+            };
+        });
+
+        // Filter questions with at least 20% relevance and sort by match percentage
+        const relevantQuestions = scoredQuestions
+            .filter(q => q.matchPercentage >= 20)
+            .sort((a, b) => b.matchPercentage - a.matchPercentage)
+            .slice(0, 20);
 
         return res.status(200).json({
             success: true,
             message: "Search results retrieved successfully",
-            count: questions.length,
-            questions
+            count: relevantQuestions.length,
+            questions: relevantQuestions
         });
 
     } catch (error) {
