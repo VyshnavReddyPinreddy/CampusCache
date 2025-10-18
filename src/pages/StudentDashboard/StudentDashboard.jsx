@@ -3,6 +3,7 @@ import QuestionsSection from './components/QuestionsSection';
 import { AppContent } from '../../context/AppContext';
 import { useContext, useState } from 'react';
 import LeaderboardSection from './components/LeaderboardSection';
+import FeedbackModal from '../../components/FeedbackModal';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +12,7 @@ const StudentDashboard = () => {
   const { userData, backendUrl } = useContext(AppContent);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Close dropdown when clicking outside
@@ -80,6 +82,16 @@ const StudentDashboard = () => {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
+                    setShowFeedback(true);
+                    setShowDropdown(false);
+                  }} 
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-indigo-50"
+                >
+                  Feedback & Help
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
                     handleLogout();
                   }} 
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-indigo-50"
@@ -99,6 +111,14 @@ const StudentDashboard = () => {
             <QuestionsSection />
           )}
         </div>
+        
+        {/* Feedback Modal */}
+        {showFeedback && (
+          <FeedbackModal
+            onClose={() => setShowFeedback(false)}
+            backendUrl={backendUrl}
+          />
+        )}
       </div>
     </div>
   );
