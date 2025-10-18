@@ -8,9 +8,17 @@ const Home = () => {
   const { isLoggedin, userData } = useContext(AppContent);
   const navigate = useNavigate();
 
+  // Only redirect on initial login, not on refresh or subsequent visits
   React.useEffect(() => {
-    if (isLoggedin && userData?.role === 'Student') {
-      navigate('/student');
+    // Get the current path from window.location
+    const currentPath = window.location.pathname;
+    
+    // Only redirect if we're on the home page and it's an initial login
+    if (isLoggedin && userData?.role === 'Student' && currentPath === '/') {
+      // Check if this is a page refresh
+      if (!performance.navigation.type === performance.navigation.TYPE_RELOAD) {
+        navigate('/student');
+      }
     }
   }, [isLoggedin, userData, navigate]);
 

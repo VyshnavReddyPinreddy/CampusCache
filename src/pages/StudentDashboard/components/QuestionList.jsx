@@ -251,7 +251,7 @@ const QuestionList = ({ questions, loading, onDelete, onReport, isUserQuestion }
 
           <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
             <div>
-              Posted by: {question.isAnonymous ? '-----' : question.author?.name || 'Unknown'}
+              Posted by: {question.isAnonymous ? '-----' : question.author?.name || '-----'}
             </div>
             <div>
               {format(new Date(question.createdAt), 'MMM d, yyyy')}

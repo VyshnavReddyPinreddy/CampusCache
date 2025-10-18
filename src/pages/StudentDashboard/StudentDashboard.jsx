@@ -5,11 +5,13 @@ import { useContext, useState } from 'react';
 import LeaderboardSection from './components/LeaderboardSection';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const StudentDashboard = () => {
   const { userData, backendUrl } = useContext(AppContent);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const navigate = useNavigate();
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -64,6 +66,16 @@ const StudentDashboard = () => {
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-indigo-50"
                 >
                   Leaderboard
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/');
+                    setShowDropdown(false);
+                  }} 
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-indigo-50"
+                >
+                  Go to Home
                 </button>
                 <button 
                   onClick={(e) => {
