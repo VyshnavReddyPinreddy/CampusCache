@@ -67,7 +67,7 @@ const AnswerList = ({ answers, loading, onDelete, onReport, isUserAnswer }) => {
 
           <div className="flex justify-between items-center text-sm text-gray-500">
             <div>
-              Posted by: {answer.isAnonymous ? '-----' : answer.author?.name || 'Unknown'}
+              Posted by: {answer.isAnonymous ? '-----' : answer.author?.name || '-----'}
             </div>
             <div>
               {format(new Date(answer.createdAt), 'MMM d, yyyy')}

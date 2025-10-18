@@ -8,6 +8,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import StudentDashboard from './pages/StudentDashboard/StudentDashboard.jsx'
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
   return (
@@ -18,8 +19,22 @@ const App = () => {
         <Route path='/login' element={<Login/>}/>
         <Route path='/email-verify' element={<EmailVerify/>}/>
         <Route path='/reset-password' element={<ResetPassword/>}/>
-        <Route path='/admin' element={<AdminDashboard/>}/>
-        <Route path='/student' element={<StudentDashboard/>}/>
+        <Route 
+          path='/admin' 
+          element={
+            <ProtectedRoute allowedRole="Admin">
+              <AdminDashboard/>
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path='/student' 
+          element={
+            <ProtectedRoute allowedRole="Student">
+              <StudentDashboard/>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   )

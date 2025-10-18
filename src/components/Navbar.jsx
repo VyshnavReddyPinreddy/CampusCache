@@ -40,7 +40,7 @@ const Navbar = () => {
 
   return (
     <div className='w-full flex justify-between items-center p-4 sm:p-6 sm:px-24 absolute top-0'>
-        <img src={assets.logo} alt="" className='w-28 sm:w-32' onClick={() => navigate('/')}/>
+        <img src={assets.cc_logo} alt="" className='w-30 sm:w-20' onClick={() => navigate('/')}/>
         {
           userData && userData.name 
           ? 
@@ -48,9 +48,39 @@ const Navbar = () => {
             {userData.name[0].toUpperCase()}
             <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-10'>
               <ul className='list-none m-0 p-2 bg-gray-100 text-sm'>
-                {!userData.isAccountVerified && <li onClick={sendVerificationOtp} className='py-1 px-2 hover:bg-gray-200'>Verify Email</li>}
-                {userData.role === 'Admin' && <li onClick={() => navigate('/admin')} className='py-1 px-2 hover:bg-gray-200'>Admin Dashboard</li>}
-                <li onClick={logout} className='py-1 px-2 pr-10 hover:bg-gray-200'>Logout</li>
+                {!userData.isAccountVerified && (
+                  <li 
+                    onClick={sendVerificationOtp} 
+                    className='py-1 px-2 hover:bg-gray-200 cursor-pointer'
+                  >
+                    Verify Email
+                  </li>
+                )}
+                {userData.role === 'Admin' && (
+                  <li 
+                    onClick={() => navigate('/admin')} 
+                    className='py-1 px-2 hover:bg-gray-200 cursor-pointer'
+                  >
+                    Admin Dashboard
+                  </li>
+                )}
+                {userData.role === 'Student' && (
+                  <li 
+                    onClick={() => {
+                      console.log('Navigating to student dashboard...');
+                      navigate('/student');
+                    }} 
+                    className='py-1 px-2 hover:bg-gray-200 cursor-pointer'
+                  >
+                    Student Dashboard
+                  </li>
+                )}
+                <li 
+                  onClick={logout} 
+                  className='py-1 px-2 pr-10 hover:bg-gray-200 cursor-pointer'
+                >
+                  Logout
+                </li>
               </ul>
             </div>
           </div> 

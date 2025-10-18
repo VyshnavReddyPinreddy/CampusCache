@@ -63,7 +63,7 @@ const EmailVerify = () => {
   },[isLoggedin,userData]);
   return (
     <div className='flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400'>
-      <img onClick={()=>navigate('/')} src={assets.logo} alt='' className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer'/>
+      <img onClick={()=>navigate('/')} src={assets.cc_campuscache} alt='' className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer'/>
       <form onSubmit={onSubmitHandler} className='bg-slate-900 p-8 rounded-lg w-96 text-sm'>
         <h1 className='text-2xl font-semibold text-white text-center mb-3'>Email Verify Otp</h1>
         <p className='text-white text-center mb-6 text-sm'>Enter the 6-digit code sent your email id.</p>

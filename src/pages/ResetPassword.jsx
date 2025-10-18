@@ -47,7 +47,7 @@ const ResetPassword = () => {
       data.success ? toast.success(data.message) : toast.error(data.message);
       data.success && setIsEmailSent(true);
     }catch(error){
-      toast.error(error.message);
+      toast.error("User with this email does not exist");
     }
   }
 
@@ -71,7 +71,7 @@ const ResetPassword = () => {
 
   return (
     <div className='flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400'>
-      <img onClick={()=>navigate('/')} src={assets.logo} alt='' className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer'/>  
+      <img onClick={()=>navigate('/')} src={assets.cc_campuscache} alt='' className='absolute left-5 sm:left-20 top-5 w-40 sm:w-40 cursor-pointer'/>  
 
       {!isEmailSent && 
 
