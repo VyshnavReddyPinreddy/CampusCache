@@ -116,9 +116,9 @@ export const login = async (request,response)=>{
             return response.status(404).json({success:false,message:"Invalid Email!"});
         }
             
-        // if(!email.endsWith('@student.nitw.ac.in') && user.role==='Student'){
-        //     return response.status(400).json({success:false,message:"Use Institute Email only !"});
-        // }
+        if(!email.endsWith('@student.nitw.ac.in') && user.role==='Student'){
+            return response.status(400).json({success:false,message:"Use Institute Email only !"});
+        }
 
         if (!user.isAccountVerified) {
             return response.status(403).json({ success: false, message: "Account not verified. Please check your email." });
