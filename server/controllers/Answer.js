@@ -2,7 +2,7 @@ import Question from "../models/Question.js";
 import Answer from "../models/Answer.js";
 import User from "../models/User.js";
 import Vote from "../models/Votes.js";
-
+import containsExplicitWord from './explicitCheck.js';
 
 //post answer
 export const postAnswer = async(req,res)=>{
@@ -18,6 +18,13 @@ export const postAnswer = async(req,res)=>{
             success:false,
             message:"provide requried fields"
         })
+    }
+
+    if(containsExplicitWord(content)){
+        return res.status(400).json({
+            success:false,
+            message:"Inappropriate Language!"
+        });
     }
 
     try{

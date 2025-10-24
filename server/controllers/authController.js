@@ -45,14 +45,14 @@ export const register = async (request,response)=>{
 
         await user.save();
         
-        // Send verification email
-        const mailOptions = {
-            from: process.env.SENDER_EMAIL,
-            to: email,
-            subject: `Verify Your Account`,
-            html : EMAIL_VERIFY_TEMPLATE.replace("{{otp}}",otp).replace("{{email}}",user.email)
-        }
-        await transporter.sendMail(mailOptions);
+        // // Send verification email
+        // const mailOptions = {
+        //     from: process.env.SENDER_EMAIL,
+        //     to: email,
+        //     subject: `Verify Your Account`,
+        //     html : EMAIL_VERIFY_TEMPLATE.replace("{{otp}}",otp).replace("{{email}}",user.email)
+        // }
+        // await transporter.sendMail(mailOptions);
         return response.status(200).json({success:true,message:"Registration successful! Please check your email to verify your account."});
 
     }catch(error){
@@ -183,14 +183,14 @@ export const sendResetOtp = async (request,response)=>{
 
         await user.save();
 
-        const mailOptions = {
-            from: process.env.SENDER_EMAIL,
-            to: user.email,
-            subject: `Password reset OTP`,
-            html:PASSWORD_RESET_TEMPLATE.replace("{{otp}}",otp).replace("{{email}}",user.email)
-        }
+        // const mailOptions = {
+        //     from: process.env.SENDER_EMAIL,
+        //     to: user.email,
+        //     subject: `Password reset OTP`,
+        //     html:PASSWORD_RESET_TEMPLATE.replace("{{otp}}",otp).replace("{{email}}",user.email)
+        // }
 
-        await transporter.sendMail(mailOptions);
+        // await transporter.sendMail(mailOptions);
         return response.status(200).json({success:true,message:"Password reset OTP sent successfully"});
 
     }catch(error){

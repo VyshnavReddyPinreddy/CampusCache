@@ -2,6 +2,7 @@ import Question from "../models/Question.js";
 import Answer from "../models/Answer.js";
 import User from "../models/User.js";
 import Vote from "../models/Votes.js";
+import containsExplicitWord from './explicitCheck.js';
 
 //post question
 export const addQuestion = async (req,res)=>{
@@ -19,6 +20,14 @@ export const addQuestion = async (req,res)=>{
             message:"provide required fields",
         });
     }
+
+    if(containsExplicitWord(title) || containsExplicitWord(content)){
+        return res.status(400).json({
+            success:false,
+            message:"Inappropriate Language!"
+        });
+    }
+
     //checking if user exitsts??
     try{
         const userDetails= await User.findById(userId);
@@ -228,6 +237,8 @@ export const deleteQuestion =async(req,res)=>{
             message:"required fields missing"
         });
     }
+
+    
 
     try{
         const questionDetails = await Question.findById(questionId);

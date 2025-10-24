@@ -3,102 +3,106 @@
 
 This file gives focused, actionable information for AI coding agents working on CampusCache. Use these points to make small, safe edits and to find where to implement features.
 
+# CampusCache — Copilot instructions (concise)
+
+Short, actionable notes to get an AI agent productive in this repository.
+
 ## Big-picture architecture
 
-- Frontend: React + Vite in `src/` (single-page app). Entry: `src/main.jsx`, top component `src/App.jsx`.
-- Backend: Express app under `server/`. Entry: `server/index.js` (run with `npm run dev` in `server`).
-- Database: MongoDB via Mongoose. Connection in `server/config/database.js`.
+- Frontend: React + Vite in `src/` (SPA). Entry: `src/main.jsx` → `src/App.jsx`.
+- Backend: Express (ES modules) in `server/`. Entry: `server/index.js` (dev: `server/npm run dev` uses `nodemon`).
+- Database: MongoDB via Mongoose. Connection: `server/config/database.js`.
 
-Why this layout: frontend and backend are colocated for local dev; root `npm run dev` (uses `concurrently`) starts both.
+Why this layout: frontend and backend are colocated so `npm run dev` (root) launches both with `concurrently` for fast local iteration.
 
-## Key components & where to look (quick links)
+## Where to look (high-value files)
 
-- Auth: `server/controllers/authController.js` and model `server/models/User.js` (JWT + cookies).
-- Q&A: `server/models/Question.js`, `server/models/Answer.js`, controllers in `server/controllers/Question.js` and `server/controllers/Answer.js`.
+- Auth: `server/controllers/authController.js`, model `server/models/User.js` — JWT + cookies; OTP/email flows use `server/config/nodemailer.js` and `server/config/emailTemplates.js`.
+- Q&A core: `server/models/Question.js`, `server/models/Answer.js`, controller `server/controllers/Question.js` (posting, search, fetch, delete).
 - Voting: `server/models/Votes.js`, `server/controllers/Voting.js`.
-- Reports & admin: `server/models/Report.js`, `server/controllers/reportController.js`, admin routes in `server/routes/adminRoutes.js` and UI in `src/pages/AdminDashboard.jsx`.
-- Email: `server/config/nodemailer.js` and `server/config/emailTemplates.js` (OTP/send flows referenced from `authController.js`).
+- Reports/Admin: `server/controllers/reportController.js`, `server/routes/adminRoutes.js`, UI `src/pages/AdminDashboard.jsx`.
+- Frontend entry: `src/main.jsx`, global state in `src/context/AppContext.jsx`, protected pages use `src/components/ProtectedRoute.jsx`.
 
-## Developer workflows (commands to run)
+## Developer workflows (commands)
 
-- Install deps (root):
+- Install (root):
 
 ```cmd
 npm install
 ```
-````
 
-- Start both client + server (recommended for local dev):
+- Start both client and server (root):
 
 ```cmd
 npm run dev
 ```
 
-This runs Vite for the frontend and `nodemon index.js` for the server via `concurrently`.
+This runs Vite (client) and `cd server && npm run dev` (server) via `concurrently`.
 
 - Start only server (from `server/`):
 
 ```cmd
-cd server
-npm run dev
+cd server; npm run dev
 ```
 
-- Build frontend for production:
+- Build frontend:
 
 ```cmd
 npm run build
 ```
 
-## Environment variables (discoverable list)
+Note: server `package.json` uses `nodemon index.js` for `dev`.
 
-- `MONGODB_URL` / `DATABASE_URL` — MongoDB connection (see `server/config/database.js`).
-- `JWT_SECRET` — used by `authController.js`.
+## Environment variables (search these files to confirm exact keys)
+
+- `MONGODB_URL` / `DATABASE_URL` — used in `server/config/database.js`.
+- `JWT_SECRET` — used in `server/controllers/authController.js`.
 - `SENDER_EMAIL`, `SENDER_PASSWORD` — used by `server/config/nodemailer.js` for sending OTPs.
 
-Set these in `server/.env` when running the server.
+Store env vars in `server/.env` for local dev.
 
-## Project-specific conventions and patterns
+## Project-specific conventions & gotchas
 
-- API responses follow shape: { success: boolean, data?: any, error?: string } — mirror this when adding endpoints (`server/controllers/*`).
-- Controllers implement business logic; routes only wire endpoints to controller functions (see `server/routes/*`).
-- Middleware: authentication middleware lives in `server/middlewares/` (look at `userAuth.js` and `adminAuth.js`).
-- Frontend state: local hooks + small Context API in `src/context/AppContext.jsx` for auth/global user state.
-- Frontend styling uses Tailwind; look at `index.css` and `vite` + Tailwind config in root files.
+- API response shape: { success: boolean, data?: any, message?: string, error?: string } — follow this exactly when adding endpoints.
+- Controllers contain business logic; `server/routes/*` should only wire controllers.
+- Authentication: JWT is stored in cookies. When modifying auth behavior, update `server/middlewares/userAuth.js` and check front-end cookie usage in `src/`.
+- Profanity/bad-words: the repo includes `extra-words.json` and `bad-words` is used in some controllers; when adding content validation, extend the filter with `extra-words.json`.
 
-## Integration & cross-component notes
+## Integration & cross-component patterns
 
-- Frontend calls backend APIs with Axios. Base URLs are used inline in components; check `src/components` and `src/pages` for examples.
-- JWT tokens are stored in cookies (set by server). When adding protected routes, ensure `cookie` is read on server-side routes (see `userAuth.js`).
-- Email flows: OTP generation occurs in `authController.js` and emails are sent via `nodemailer.js` templates. Avoid changing template keys without updating `emailTemplates.js`.
+- Frontend calls backend with Axios; some components use inline base URLs. Search `axios` imports in `src/pages` for examples.
+- Email flows: OTP generation → `server/config/emailTemplates.js` → `server/config/nodemailer.js` sends email. Do not rename template keys without updating both files.
+- Points system: user actions (posting questions/answers) increment/decrement `points` on `User` documents (see `Question.js` and `Answer.js` controllers).
 
 ## Safe edit checklist (before PR)
 
-1. Follow the response shape `{ success, data, error }` in new endpoints.
-2. Update corresponding route in `server/routes/` and add tests or a brief manual verification note.
-3. When changing auth or token behavior, update `server/middlewares/*` and search for cookie usage in `src/`.
-4. Preserve existing environment variable names; add new ones to README and `.env.example` (if created).
+1. Use the project's API response shape in controllers.
+2. Add/update the corresponding route in `server/routes/` when creating endpoints.
+3. When changing auth/cookies, update `server/middlewares/*` and search for cookie usage across `src/`.
+4. If you add new environment variables, mention them in README and `.env.example`.
 
-## Examples (copy-paste patterns to reuse)
+## Quick examples & patterns
 
-- Return format in controllers:
+- Controller success response:
 
 ```js
 return res.json({ success: true, data: result });
-// on error:
-// return res.status(400).json({ success: false, error: 'reason' });
 ```
 
-- Start both dev servers (root): `npm run dev` — uses `concurrently` and runs `vite` and `server` script.
+- Controller error response:
 
-## Files to open first when investigating a task
+```js
+return res.status(400).json({ success: false, message: 'reason' });
+```
 
-- `server/index.js`, `server/controllers/authController.js`, `server/config/database.js`
-- `src/main.jsx`, `src/App.jsx`, `src/context/AppContext.jsx`
+- Use `populate()` on Mongoose queries to attach author info: see `server/controllers/Question.js` for patterns handling anonymous authors.
+
+## Files to open first when debugging or adding features
+
+- `server/index.js`, `server/controllers/authController.js`, `server/config/database.js` — auth + DB wiring
+- `server/controllers/Question.js`, `server/models/Question.js` — core Q&A behavior
+- `src/main.jsx`, `src/App.jsx`, `src/context/AppContext.jsx` — frontend entry & global state
 
 ---
 
-If anything here is unclear or you'd like more specifics (examples for adding a new endpoint, wiring OAuth, or a migration plan), tell me which area to expand and I'll update this file.
-
-```
-   - Context API for global state
-```
+If you'd like, I can expand any section (tests, adding a new endpoint, or wiring CI) or add example unit tests and a short verification checklist.

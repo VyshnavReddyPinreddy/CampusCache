@@ -2,6 +2,7 @@ import Report from '../models/Report.js';
 import Question from '../models/Question.js';
 import Answer from '../models/Answer.js';
 import userModel from '../models/User.js';
+import { createNotification } from './notificationController.js';
 
 // Controller to get all individual pending reports
 export const getPendingReports = async (request, response) => {
@@ -83,12 +84,26 @@ export const resolveReport = async (request, response) => {
                 const question = await Question.findById(contentId);
                 const authorId = question.author;
                 await userModel.findByIdAndUpdate(authorId, {$inc: {points: -20}});
+                // Create notification for question deletion
+                await createNotification(
+                    authorId,
+                    question.content,
+                    contentId,
+                    'Your question has been removed by an administrator due to reported violations.'
+                );
                 await Answer.deleteMany({question:contentId});
                 await Question.findByIdAndDelete(contentId);
             }else if(contentType==='Answer'){
                 const answer = await Answer.findById(contentId);
                 const authorId = answer.author;
                 await userModel.findByIdAndUpdate(authorId, {$inc: {points: -20}});
+                // Create notification for answer deletion
+                await createNotification(
+                    authorId,
+                    answer.content,
+                    contentId,
+                    'Your answer has been removed by an administrator due to reported violations.'
+                );
                 await Answer.findByIdAndDelete(contentId);
             }
         }

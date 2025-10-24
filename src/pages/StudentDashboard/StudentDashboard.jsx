@@ -3,6 +3,7 @@ import QuestionsSection from './components/QuestionsSection';
 import { AppContent } from '../../context/AppContext';
 import { useContext, useState } from 'react';
 import LeaderboardSection from './components/LeaderboardSection';
+import NotificationsSection from './components/NotificationsSection';
 import FeedbackModal from '../../components/FeedbackModal';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -13,6 +14,7 @@ const StudentDashboard = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
 
   // Close dropdown when clicking outside
@@ -62,12 +64,25 @@ const StudentDashboard = () => {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
+                    setShowLeaderboard(false);
+                    setShowNotifications(false);
                     setShowLeaderboard(true);
                     setShowDropdown(false);
                   }} 
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-indigo-50"
                 >
                   Leaderboard
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLeaderboard(false);
+                    setShowNotifications(true);
+                    setShowDropdown(false);
+                  }} 
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-indigo-50"
+                >
+                  Notifications
                 </button>
                 <button 
                   onClick={(e) => {
@@ -107,6 +122,8 @@ const StudentDashboard = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           {showLeaderboard ? (
             <LeaderboardSection onClose={() => setShowLeaderboard(false)} />
+          ) : showNotifications ? (
+            <NotificationsSection onClose={() => setShowNotifications(false)} />
           ) : (
             <QuestionsSection />
           )}

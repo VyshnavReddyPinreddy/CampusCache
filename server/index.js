@@ -15,6 +15,7 @@ import userRouter from './routes/userRoutes.js';
 import answerRouter from "./routes/answerRoutes.js";
 import contentFetchRouter from "./routes/contentFetchRoutes.js";
 import feedbackRouter from "./routes/feedbackRoutes.js";
+import notificationRouter from "./routes/notificationRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -37,5 +38,6 @@ app.use('/api/user', userRouter);
 app.use('/api/answer', answerRouter);
 app.use('/api/fetch', contentFetchRouter);
 app.use('/api/feedback', feedbackRouter);
+app.use('/api/notifications', notificationRouter);
 
 app.listen(port,()=>console.log(`Server running on PORT : ${port}`));
