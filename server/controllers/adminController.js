@@ -66,7 +66,7 @@ export const claimReport = async (request, response) => {
 // Controller to resolve an individual report
 export const resolveReport = async (request, response) => {
     const {contentId} = request.params;
-    const {action} = request.body;
+    const {action,reporterId} = request.body;
     const adminId = request.body.userId;
     try{
         const reportsToResolve = await Report.find({
@@ -105,6 +105,26 @@ export const resolveReport = async (request, response) => {
                     'Your answer has been removed by an administrator due to reported violations.'
                 );
                 await Answer.findByIdAndDelete(contentId);
+            }
+        }else{
+            const reporter = await userModel.findByIdAndUpdate(
+                reporterId,
+                {$inc:{invalidReports:1}},
+                {new: true}
+            );
+            
+            if(reporter.invalidReports === 3){
+                // Create notification for reporter about invalid reports
+                await createNotification(
+                    reporterId,
+                    'System',  // contentType for system notifications
+                    reporter._id,  // using reporter's ID as contentId for system notifications
+                    'Your account has been flagged for multiple invalid reports. You cannot report for next 24 hours.'
+                );
+                await userModel.findByIdAndUpdate(
+                    reporterId,
+                    {reportEnableAt: Date.now() + 24*60*60*1000}
+                );
             }
         }
         await Report.deleteMany({contentId:contentId,status:'In Progress',reviewedBy:adminId});

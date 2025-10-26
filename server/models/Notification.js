@@ -12,7 +12,8 @@ const notificationSchema = new mongoose.Schema({
     },
     contentType: {
         type: String,
-        required: true
+        required: true,
+        enum: ['Question', 'Answer', 'System']  // Added System type for system notifications
     },
     contentId: {
         type: mongoose.Schema.Types.ObjectId,

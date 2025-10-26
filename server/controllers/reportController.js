@@ -1,6 +1,7 @@
 import Report from '../models/Report.js';
 import Question from '../models/Question.js';
 import Answer from '../models/Answer.js';
+import userModel from '../models/User.js';
 
 export const createReport = async (request, response) => {
     const { userId,contentId, contentType, reasons} = request.body;
@@ -10,6 +11,20 @@ export const createReport = async (request, response) => {
     }
 
     try {
+        // Check if user is restricted from reporting
+        const user = await userModel.findById(userId);
+        if (user.invalidReports >= 3 && user.reportEnableAt > Date.now()) {
+            const remainingTime = Math.ceil((user.reportEnableAt - Date.now()) / (1000 * 60 * 60)); // Convert to hours
+            return response.status(403).json({ 
+                success: false, 
+                message: `You are temporarily restricted from reporting content. Please try again in ${remainingTime} hours.` 
+            });
+        }else if(user.invalidReports >=3 && user.reportEnableAt <= Date.now()){
+            // Reset invalid reports count after restriction period
+            user.invalidReports = 0;
+            user.reportEnableAt = 0;
+            await user.save();
+        }
         if(contentType==='Question'){
             const question = await Question.findById(contentId);
             if(!question){

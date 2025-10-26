@@ -28,13 +28,13 @@ const submitFeedback = async (req, res) => {
             ${feedback}
         `;
 
-        // Send email
-        await transporter.sendMail({
-            from: process.env.SENDER_EMAIL,
-            to: process.env.SENDER_EMAIL, // Send to admin email
-            subject: 'New User Feedback - CampusCache',
-            text: emailContent
-        });
+        // // Send email
+        // await transporter.sendMail({
+        //     from: process.env.SENDER_EMAIL,
+        //     to: process.env.SENDER_EMAIL, // Send to admin email
+        //     subject: 'New User Feedback - CampusCache',
+        //     text: emailContent
+        // });
 
         return res.json({
             success: true,

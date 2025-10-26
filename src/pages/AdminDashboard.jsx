@@ -133,9 +133,9 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleResolve = async (contentId, action) => {
+  const handleResolve = async (contentId, action,reporterId) => {
     try{
-      const {data} = await axios.post(`${backendUrl}/api/admin/reports/resolve/${contentId}`,{action});
+      const {data} = await axios.post(`${backendUrl}/api/admin/reports/resolve/${contentId}`,{action,reporterId});
       if(!data.success){
         toast.error('Failed to resolve report');
       }else{
@@ -223,7 +223,7 @@ const AdminDashboard = () => {
                 Delete Content
               </button>
               <button
-                onClick={() => handleResolve(report.contentId, 'No Action Needed')}
+                onClick={() => handleResolve(report.contentId, 'No Action Needed',report.reportedBy)}
                 className="bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600 transition-colors hover:cursor-pointer"
               >
                 Mark Safe

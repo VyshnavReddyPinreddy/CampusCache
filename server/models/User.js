@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    invalidReports:{
+        type:Number,
+        default:0
+    },
+    reportEnableAt:{type:Number,default:0},
     verifyOtp:{type:String,default:''},
     verifyOtpExpireAt:{type:Number,default:0},
     isAccountVerified:{type:Boolean,default:false},

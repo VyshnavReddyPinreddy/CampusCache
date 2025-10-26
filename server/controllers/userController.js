@@ -20,3 +20,17 @@ export const getUserData = async (request,response)=>{
         response.status(500).json({success:false, message:error.message});
     }
 }
+
+export const resetInvalidReports = async (request, response) => {
+    const userId = request.body.userId;
+    try {
+        if (!userId) {
+            return response.status(401).json({ success: false, message: "Authentication required" });
+        }   
+        await userModel.findByIdAndUpdate(request.userId, { invalidReports: 0, reportEnableAt: 0 });
+        response.json({ success: true, message: "Invalid reports count reset successfully" });
+    } catch (error) {
+        console.error('Error in resetInvalidReports:', error);
+        response.status(500).json({ success: false, message: error.message });
+    }   
+}

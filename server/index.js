@@ -39,5 +39,6 @@ app.use('/api/answer', answerRouter);
 app.use('/api/fetch', contentFetchRouter);
 app.use('/api/feedback', feedbackRouter);
 app.use('/api/notifications', notificationRouter);
+app.use('/api/user',userRouter);
 
 app.listen(port,()=>console.log(`Server running on PORT : ${port}`));
