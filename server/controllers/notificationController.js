@@ -26,23 +26,27 @@ export const getUserNotifications = async (req, res) => {
     }
 };
 
-// Mark notification as read
-export const markNotificationAsRead = async (req, res) => {
+// Toggle notification read status
+export const toggleNotificationReadStatus = async (req, res) => {
     try {
         const { notificationId } = req.params;
         
-        const notification = await Notification.findByIdAndUpdate(
-            notificationId,
-            { isRead: true },
-            { new: true }
-        );
-
-        if (!notification) {
+        // First get the current notification to check its status
+        const currentNotification = await Notification.findById(notificationId);
+        
+        if (!currentNotification) {
             return res.status(404).json({
                 success: false,
                 message: "Notification not found"
             });
         }
+
+        // Toggle the isRead status
+        const notification = await Notification.findByIdAndUpdate(
+            notificationId,
+            { isRead: !currentNotification.isRead },
+            { new: true }
+        );
 
         return res.status(200).json({
             success: true,
