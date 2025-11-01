@@ -1,12 +1,9 @@
 -----
 
-\<div align="center"\>
 
 # 🚀 CAMPUSCACHE
 
 **A full-stack MERN Q\&A platform for the NIT Warangal student community. Built with role-based auth, a gamified points system, and a robust admin moderation panel.**
-
-\</div\>
 
 -----
 
@@ -225,7 +222,7 @@ This project is licensed under the MIT License - see the `LICENSE` file for deta
 <div align="center">
 <h3>✨ Built with ❤️ by our amazing team ✨</h3>
 <p>
-  <a href="https://github.com/your-username">Vyshnav Reddy Pinreddy</a> | 
+  <a href="https://github.com/VyshnavReddyPinreddy">Vyshnav Reddy Pinreddy</a> | 
   <a href="https://github.com/Anjii-08">Anjaneyulu Baikani</a> | 
   <a href="https://github.com/Rishith-Thommandru">Rishith Thommandru</a>
 </p>
